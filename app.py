@@ -27,8 +27,23 @@ possibletimes = ["Choose a time",
     "16:00", "16:30",
     "17:00", "17:30",
     "18:00", "18:30",
-    "19:00", "19:30"
-    ]
+    "19:00", "19:30",
+    "20:00", "20:30",
+    "21:00"
+]
+possibletimesweekend = ["Choose a time",
+    "09:00", "09:30",
+    "10:00", "10:30",
+    "11:00", "11:30",
+    "12:00", "12:30",
+    "13:00", "13:30",
+    "14:00", "14:30",
+    "15:00", "15:30",
+    "16:00", "16:30",
+    "17:00", "17:30",
+    "18:00", "18:30",
+    "19:00"
+]
 
 # Form fields
 class BookingForm(FlaskForm):
@@ -36,7 +51,7 @@ class BookingForm(FlaskForm):
     people = SelectField('People', choices=numofpeople)
     court = SelectField('Court', choices=courts)
     date = DateField('Date', format='%Y-%m-%d', default=datetime.now())
-    time = SelectField('Time (open from 09:00 to 20:00)', choices=possibletimes, default="Choose a time")
+    time = SelectField('Time (open from 09:00 to 22:00)', choices=possibletimes, default="Choose a time")
 
 
 
@@ -85,11 +100,12 @@ def form():
 # REQUIREMENTS
     # form 
         # displays a calendar daypicker but withinvalid dates disabled (already past dates, days where club is closed, days more than a month from today)
-        # displays only options of valid times (from 09:00 to 20:00, with a step of 30 minutes) (only enable to pick available times for the specific court)
+        # displays only options of valid times (from 09:00 to 22:00, with a step of 30 minutes) (only enable to pick available times for the specific court)
         # a booking is for 1 hour (after booking is done, make the time for that specific day and court unavailable)
         # have action for user to cancel booking, which makes the times of it available again
         # whenever an appointment or cancellation is made, send me an email to gosorio@sandiego.edu with the info of what happened
         # maximum of 2 reservations per day per person (2 hours) (except for admin)
+        # if reservation is for Saturday or Sunday, possibletimes are until 20:00 only (use possibletimesweekend array for choices)
     # database
         # define schema
         # create tables
