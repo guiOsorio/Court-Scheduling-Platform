@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+    <form action="/form" method="POST" class="schedule-form">
+        {{ form.csrf_token }}
+
+        {{ form.name.label }}
+        {{ form.name }}
+
+        {{ form.people.label }}
+        {{ form.people }}
+
+        {{ form.court.label }}
+        {{ form.court }}
+
+        {{ form.date.label }}
+        {{ form.date }}
+
+        {{ form.time.label }}
+        {{ form.time }}
+
+        <button>Submit</button>
+    </form>
+
+{% endblock %}

@@ -1,1 +1,6 @@
 flask
+flask_wtf
+wtforms
+datetime
+sqlite3
+os
