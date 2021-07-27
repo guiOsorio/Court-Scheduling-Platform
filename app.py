@@ -208,8 +208,7 @@ def logout():
 
 
 # REQUIREMENTS
-    # implement login
-    # implement SASS
+    # simplify app.py
     # form 
         # displays a calendar daypicker but with invalid dates disabled (already past dates, days where club is closed, days more than a month from today)
         # displays only options of valid times (from 09:00 to 22:00, with a step of 30 minutes) (only enable to pick available times for the specific court)

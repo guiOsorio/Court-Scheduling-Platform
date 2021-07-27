@@ -1,0 +1,32 @@
+.nav {
+  background-color: #0F70A9 !important;
+  margin-bottom: 1rem;
+}
+.nav__title {
+  color: #FFF !important;
+  font-weight: bold;
+}
+.nav-link {
+  color: #000 !important;
+  font-weight: bold;
+}
+.nav-link:hover {
+  color: #999 !important;
+}
+
+.reservation-form {
+  width: 40%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.reservation-form label {
+  padding-top: 20px;
+}
+.reservation-form button {
+  width: 50%;
+  margin: 20px auto;
+}
+
+/*# sourceMappingURL=main.css.map */

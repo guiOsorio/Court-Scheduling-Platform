@@ -1,0 +1,18 @@
+.nav {
+    background-color: $color-primary !important;
+    margin-bottom: 1rem;
+
+    &__title {
+        color: $color-white !important;
+        font-weight: bold;
+    }
+
+    &-link {
+        color: $color-black !important;
+        font-weight: bold;
+
+        &:hover {
+            color: $color-grey !important;
+        }
+    }
+}
