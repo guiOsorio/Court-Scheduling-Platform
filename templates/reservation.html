@@ -2,11 +2,10 @@
 
 {% block content %}
 
-    <form action="/form" method="POST" class="schedule-form">
-        {{ form.csrf_token }}
+    <h1>RESERVATION</h1>
 
-        {{ form.name.label }}
-        {{ form.name }}
+    <form action="/reservation" method="POST" class="reservation-form">
+        {{ form.csrf_token }}
 
         {{ form.people.label }}
         {{ form.people }}

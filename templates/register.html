@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+    <h1>REGISTER</h1>
+
+    <form action="/register" method="POST">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username">
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+
+        <label for="pswdconf">Password confirmation</label>
+        <input type="password" name="pswdconf" id="pswdconf">
+
+        <button>Register</button>
+    </form>
+
+{% endblock %}

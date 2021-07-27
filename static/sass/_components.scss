@@ -1,0 +1,17 @@
+.reservation-form {
+    width: 40%;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    & label {
+        padding-top: 20px;
+    }
+
+    & button {
+        width: 50%;
+        margin: 20px auto;
+    }
+}
