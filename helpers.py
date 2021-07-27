@@ -1,9 +1,25 @@
-from flask import Flask, flash, redirect, render_template, request
+from flask import flash, redirect, session
 from datetime import datetime
+from functools import wraps
 
 
-def validate(name, people, court, date, time, numofpeople, courts, ptw, pt):
-    if name == "" or people == "" or court == "" or date == "" or time == "Choose a time":
+def login_required(f):
+    """
+    Decorate routes to require login.
+
+    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            flash("Login required")
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt):
+    if people == "" or court == "" or date == "" or time == "Choose a time":
             flash("Please fill out all fields")
             return False
 
