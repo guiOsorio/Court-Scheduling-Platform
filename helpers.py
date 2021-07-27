@@ -1,6 +1,9 @@
+import sqlite3
+
 from flask import flash, redirect, session
 from datetime import datetime
 from functools import wraps
+from werkzeug.security import check_password_hash
 
 
 def login_required(f):
@@ -74,3 +77,54 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt)
             return False
     else:
         return True #################################
+
+
+def validateLogin(username, password):
+    # Ensure username was submitted
+    if not username:
+        flash("Must have a username")
+        return False
+
+    # Ensure password was submitted
+    elif not password:
+        flash("Must have a password")
+        return False
+
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT * FROM users WHERE username = :username", {"username": username})
+    user = cur.fetchone()
+
+    if not user:
+        flash("Username doesn't exist")
+        return False
+
+    # Ensure username exists and password is correct
+    table_hash = user[2]
+    if not check_password_hash(table_hash, password):
+        flash("Invalid password")
+        return False
+
+    return True
+
+
+def validateRegistration(usernames, username, password, confirmation):
+    # Handles username already existing
+        for user in usernames:
+            if username in user:
+                flash("This username is already taken")
+                return False
+
+        # Handles username or password fields being blank
+        if username.strip() == "" or password.strip() == "" or confirmation.strip() == "":
+            flash("All items need a value")
+            return False
+        
+        # Handles password and password confirmation not matching
+        elif password != confirmation:
+            flash("Password and confirmation fields don't match")
+            return False
+        
+        return True

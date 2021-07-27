@@ -8,9 +8,9 @@ from wtforms.fields.html5 import DateField
 from wtforms import StringField, SelectField
 from datetime import datetime
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
-from helpers import login_required, validateReservation
+from helpers import login_required, validateReservation, validateLogin, validateRegistration
 
 # Initialize app
 app = Flask(__name__)
@@ -100,32 +100,12 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # Ensure username was submitted
-        if not username:
-            flash("Must have a username")
+        if not validateLogin(username, password):
             return render_template("login.html")
-
-        # Ensure password was submitted
-        elif not password:
-            flash("Must have a password")
-            return render_template("login.html")
-
+        
         # Connect to database
         con = sqlite3.connect("scheduling.db")
         cur = con.cursor()
-
-        cur.execute("SELECT * FROM users WHERE username = :username", {"username": username})
-        user = cur.fetchone()
-
-        if not user:
-            flash("Username doesn't exist")
-            return render_template("login.html")
-
-        # Ensure username exists and password is correct
-        table_hash = user[2]
-        if not check_password_hash(table_hash, password):
-            flash("Invalid password")
-            return render_template("login.html")
 
         # Get id of user who logged in to store in the session
         cur.execute("SELECT * FROM users WHERE username = :username", {"username": username})
@@ -159,22 +139,7 @@ def register():
         cur.execute("SELECT username FROM users")
         usernames = cur.fetchall()
 
-        # VALIDATION
-
-        # Handles username already existing
-        for user in usernames:
-            if username in user:
-                flash("This username is already taken")
-                return render_template("register.html")
-
-        # Handles username or password fields being blank
-        if username.strip() == "" or password.strip() == "" or confirmation.strip() == "":
-            flash("All items need a value")
-            return render_template("register.html")
-        
-        # Handles password and password confirmation not matching
-        elif password != confirmation:
-            flash("Password and confirmation fields need to match")
+        if not validateRegistration(usernames, username, password, confirmation):
             return render_template("register.html")
 
         # Successful registering
