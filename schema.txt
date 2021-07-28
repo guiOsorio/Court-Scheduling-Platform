@@ -3,7 +3,23 @@ USERS TABLE:
             "id"    INTEGER,
             "username"      TEXT NOT NULL,
             "hash"  TEXT NOT NULL,
-            PRIMARY KEY("id" AUTOINCREMENT)        
+            "type" TEXT DEFAULT "user", 
+            PRIMARY KEY("id")        
+		);
+
+
+RESERVATIONS TABLE:
+        CREATE TABLE "reservations" (
+            "reservation_id"  INTEGER,
+            "user_id"  INTEGER,
+            "week_day" TEXT NOT NULL,
+            "date"  TEXT NOT NULL,
+            "time"  TEXT NOT NULL,
+            "court" INTEGER NOT NULL,
+            "people" INTEGER NOT NULL,
+            "made_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY("reservation_id"),
+            FOREIGN KEY("user_id") REFERENCES users("id")
         );
 
 

@@ -39,7 +39,7 @@ possibletimes = ["Choose a time",
     "18:00", "18:30",
     "19:00", "19:30",
     "20:00", "20:30",
-    "21:00"
+    "21:00", "21:30"
 ]
 possibletimesweekend = ["Choose a time",
     "09:00", "09:30",
@@ -52,7 +52,7 @@ possibletimesweekend = ["Choose a time",
     "16:00", "16:30",
     "17:00", "17:30",
     "18:00", "18:30",
-    "19:00"
+    "19:00", "19:30"
 ]
 
 # Reservation Form
@@ -73,19 +73,36 @@ def index():
 @app.route("/reservation", methods=["GET", "POST"])
 @login_required
 def reservation():
+
     # Initialize form
     form = ReservationForm()
+
+    user_id = session["user_id"] # store current user's id
 
     # if request is POST and form fields are validated
     if form.validate_on_submit():
         people = form.people.data # string
         court = form.court.data # string
         date = form.date.data # datetime.date
+        selected_date = date.strftime("%Y-%m-%d") # string
         time = form.time.data # string
 
-        if validateReservation(people, court, date, time, numofpeople, courts, possibletimesweekend, possibletimes):
-            user_id = session["user_id"]
-            return render_template("data.html", people=people, court=court, date=date, time=time, user_id=user_id)
+        if validateReservation(people, court, date, time, numofpeople, courts, possibletimesweekend, possibletimes, user_id):
+
+            # Connect to database
+            con = sqlite3.connect("scheduling.db")
+            cur = con.cursor()
+
+            selected_weekday = date.strftime("%A") # string current day of the week abbreviation (3 characters)
+
+            cur.execute("""INSERT INTO reservations (user_id, week_day, date, time, court, people) 
+                        VALUES (:user_id, :week_day, :date, :time, :court, :people)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people})
+            con.commit()
+
+            flash("Reservation successful!!")
+
+            return redirect("/")
 
 
     return render_template("reservation.html", form=form)
@@ -94,6 +111,9 @@ def reservation():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
+    # Forget any user_id
+    session.clear()
 
     if request.method == "POST":
 
@@ -172,8 +192,34 @@ def logout():
     return redirect("/login")
 
 
-# REQUIREMENTS
-    # simplify app.py
+@app.route("/upcoming", methods=["GET", "POST"])
+def upcoming():
+
+    user_id = session["user_id"] # store current user's id
+
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    if request.method == "POST":
+        id = request.form.get("id")
+        cur.execute("DELETE FROM reservations WHERE reservation_id = :id", {"id": id})
+        con.commit()
+        flash("Successfully deleted!!")
+
+    # Find upcoming reservations for logged in user
+    cur.execute("""SELECT week_day, date, time, court, people, reservation_id FROM reservations
+                WHERE user_id = :user_id""", {"user_id": user_id})
+    reservations_data = cur.fetchall()
+
+    if not reservations_data:
+        msg = "No upcoming bookings"
+        return render_template("upcoming.html", msg=msg)
+    else:
+        return render_template("upcoming.html", rd=reservations_data)
+
+
+# APP REQUIREMENTS
     # form 
         # displays a calendar daypicker but with invalid dates disabled (already past dates, days where club is closed, days more than a month from today)
         # displays only options of valid times (from 09:00 to 22:00, with a step of 30 minutes) (only enable to pick available times for the specific court)
@@ -184,11 +230,12 @@ def logout():
         # define schema (consider admin type)
         # create tables
         # insert SQL statements in app.py, where needed
-        # a booking is for 1 hour (after booking is done, make the time for that specific day and court unavailable)
+        # maximum of 2 reservations per day per person (1 hour) (except for admin)
+        # a booking is for 30 minutes (after booking is done, make the time for that specific day and court unavailable)
         # have action for user to cancel booking, which makes the times of it available again
-        # maximum of 2 reservations per day per person (2 hours) (except for admin)
         # create indexes where useful
-    # admin page
+    # admin 
+        # have way to register an admin with a special login
         # admin needs to login in order to access this page
         # show all reservations for each court for the selected day (default for today)
         # admin has the ability to delete any reservation for any day and to book a court for an extended period of time (more than 1 hour)

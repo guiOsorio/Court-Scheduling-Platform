@@ -21,21 +21,21 @@ def login_required(f):
     return decorated_function
 
 
-def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt):
+def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
     if people == "" or court == "" or date == "" or time == "Choose a time":
             flash("Please fill out all fields")
             return False
 
-    selected_date_str = date.strftime("%Y-%m-%d") # string selected date 
+    selected_date = date.strftime("%Y-%m-%d") # string
     current_time_str = datetime.now().strftime("%H:%M") # string
     selected_weekday = date.strftime("%a") # string current day of the week abbreviation (3 characters)
 
     # selected date/time data in int
     selected_hour = int(time[:2])
     selected_minute = int(time[3:])
-    selected_year = int(selected_date_str[:4])
-    selected_month = int(selected_date_str[5:7])
-    selected_day = int(selected_date_str[8:])
+    selected_year = int(selected_date[:4])
+    selected_month = int(selected_date[5:7])
+    selected_day = int(selected_date[8:])
 
     # current date/time data in int
     current_hour = int(current_time_str[:2]) # int
@@ -43,6 +43,20 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt)
     current_year = datetime.now().year # int
     current_month = datetime.now().month # int
     current_day = datetime.now().day # int
+
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    # Check number of reservations and if user is an admin
+    cur.execute("""SELECT COUNT(*), type FROM reservations JOIN users ON user_id = id
+                WHERE user_id = :user_id AND date = :date""", {"user_id": user_id, "date": selected_date})
+    selected_day_reservations = cur.fetchone()
+
+    # Check if that time is already booked
+    cur.execute("""SELECT * FROM reservations
+                WHERE date = :date AND time = :time AND court = :court""", {"date": selected_date, "time": time, "court": court})
+    is_booked = cur.fetchone()
 
     # Own validation
     if people not in numofpeople:
@@ -57,9 +71,15 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt)
     elif selected_year < current_year or (selected_year == current_year and (selected_month < current_month) or (selected_month == current_month and selected_day < current_day)):
         flash("Please provide a valid date")
         return False
+    elif selected_day_reservations[0] >= 2 and selected_day_reservations[1] != "admin":
+        flash("A maximum of 2 bookings per person per day is allowed")
+        return False
+    elif is_booked:
+        flash("This court is already booked at this time. Please select a different court or time")
+        return False
     elif selected_year == current_year and selected_month == current_month and selected_day == current_day and selected_hour <= current_hour + 1:
         if selected_hour == current_hour + 1 and (60 + selected_minute - current_minute) <= 30:
-            flash("Online reservations can only be made at least 30 minutes prior to palying time")
+            flash("Online reservations can only be made at least 30 minutes prior to playing time")
             return False
         elif selected_hour == current_hour + 1 and (60 + selected_minute - current_minute) > 30:
             return True #######################
