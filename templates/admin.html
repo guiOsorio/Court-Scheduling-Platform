@@ -7,12 +7,16 @@
     <h3>Check day</h3>
 
     <form action="/admin" method="POST">
-        {{ form.csrf_token }}
+        {{ form_check.csrf_token }}
 
-        {{ form.date.label }}
-        {{ form.date }}
+        {{ form_check.date.label }}
+        {{ form_check.date }}
 
         <button>Check day</button>
+    </form>
+
+    <form action="/admin" method="GET">
+        <button>Reset</button>
     </form>
 
     {% if msg %}
@@ -49,4 +53,19 @@
 
         <button>Create index</button>
     </form>
+
+    <h3>Book day</h3>
+
+    <form action="/bookday" method="POST">
+        {{ form_bookday.csrf_token }}
+
+        {{ form_bookday.court.label }}
+        {{ form_bookday.court}}
+
+        {{ form_bookday.date.label }}
+        {{ form_bookday.date }}
+
+        <button>Book day</button>
+    </form>
+
 {% endblock %}
