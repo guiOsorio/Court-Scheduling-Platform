@@ -8,9 +8,9 @@ USERS TABLE:
 		);
 
 
-RESERVATIONS TABLE:
-        CREATE TABLE "reservations" (
-            "reservation_id"  INTEGER,
+BOOKINGS TABLE:
+        CREATE TABLE "bookings" (
+            "booking_id"  INTEGER,
             "user_id"  INTEGER,
             "week_day" TEXT NOT NULL,
             "date"  TEXT NOT NULL,
@@ -18,7 +18,7 @@ RESERVATIONS TABLE:
             "court" INTEGER NOT NULL,
             "people" INTEGER NOT NULL,
             "made_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY("reservation_id"),
+            PRIMARY KEY("booking_id"),
             FOREIGN KEY("user_id") REFERENCES users("id")
         );
 

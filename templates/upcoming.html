@@ -7,18 +7,18 @@
     {% if msg %}
         <h4>{{ msg }}</h4>
     {% else %}
-        {% for r in rd %}
+        {% for b in bd %}
             <h4>BOOKING</h4>
             <ul>
-                <li>Day - {{ r[0] }}</li>
-                <li>Date - {{ r[1] }}</li>
-                <li>Time - {{ r[2] }}</li>
-                <li>Court - {{ r[3] }}</li>
-                <li>People playing - {{ r[4] }}</li>
+                <li>Day - {{ b[0] }}</li>
+                <li>Date - {{ b[1] }}</li>
+                <li>Time - {{ b[2] }}</li>
+                <li>Court - {{b[3] }}</li>
+                <li>People playing - {{ b[4] }}</li>
             </ul>
 
             <form action="/upcoming" method="POST">
-                <input type="hidden" name="id" value="{{ r[5] }}">
+                <input type="hidden" name="id" value="{{ b[5] }}">
                 <button>Delete</button>
             </form>
         {% endfor %}

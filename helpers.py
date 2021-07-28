@@ -21,7 +21,7 @@ def login_required(f):
     return decorated_function
 
 
-def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
+def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
     if people == "" or court == "" or date == "" or time == "Choose a time":
             flash("Please fill out all fields")
             return False
@@ -48,13 +48,13 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt,
     con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
-    # Check number of reservations and if user is an admin
-    cur.execute("""SELECT COUNT(*), type FROM reservations JOIN users ON user_id = id
+    # Check number of bookings and if user is an admin
+    cur.execute("""SELECT COUNT(*), type FROM bookings JOIN users ON user_id = id
                 WHERE user_id = :user_id AND date = :date""", {"user_id": user_id, "date": selected_date})
-    selected_day_reservations = cur.fetchone()
+    selected_day_bookings = cur.fetchone()
 
     # Check if that time is already booked
-    cur.execute("""SELECT * FROM reservations
+    cur.execute("""SELECT * FROM bookings
                 WHERE date = :date AND time = :time AND court = :court""", {"date": selected_date, "time": time, "court": court})
     is_booked = cur.fetchone()
 
@@ -66,12 +66,12 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt,
         flash("Please select a valid court")
         return False
     elif ((selected_weekday == "Sat" or selected_weekday == "Sun") and time not in ptw) or time not in pt:
-        flash("The club is not open at this time. Week hours are 09:00 to 22:00. Weekend hours are 09:00 to 20:00 (reservations are allowed until 1 hour before closing)")
+        flash("The club is not open at this time. Week hours are 09:00 to 22:00. Weekend hours are 09:00 to 20:00 (bookings are allowed until 1 hour before closing)")
         return False
     elif selected_year < current_year or (selected_year == current_year and (selected_month < current_month) or (selected_month == current_month and selected_day < current_day)):
         flash("Please provide a valid date")
         return False
-    elif selected_day_reservations[0] >= 2 and selected_day_reservations[1] != "admin":
+    elif selected_day_bookings[0] >= 2 and selected_day_bookings[1] != "admin":
         flash("A maximum of 2 bookings per person per day is allowed")
         return False
     elif is_booked:
@@ -79,7 +79,7 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt,
         return False
     elif selected_year == current_year and selected_month == current_month and selected_day == current_day and selected_hour <= current_hour + 1:
         if selected_hour == current_hour + 1 and (60 + selected_minute - current_minute) <= 30:
-            flash("Online reservations can only be made at least 30 minutes prior to playing time")
+            flash("Online bookings can only be made at least 30 minutes prior to playing time")
             return False
         elif selected_hour == current_hour + 1 and (60 + selected_minute - current_minute) > 30:
             return True #######################
@@ -87,13 +87,13 @@ def validateReservation(people, court, date, time, numofpeople, courts, ptw, pt,
             flash("Please select a valid time")
             return False
     elif selected_month > current_month + 1:
-        flash("Reservations are only allowed for the current and the next month")
+        flash("Bookings are only allowed for the current and the next month")
         return False
     elif selected_year > current_year:
         if current_month == 12 and selected_month == 1:
             return True ###############################
         else:
-            flash("Reservations are only allowed for the current and the next month")
+            flash("Bookings are only allowed for the current and the next month")
             return False
     else:
         return True #################################

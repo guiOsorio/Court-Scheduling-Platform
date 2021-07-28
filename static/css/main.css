@@ -14,17 +14,17 @@
   color: #999 !important;
 }
 
-.reservation-form {
+.booking-form {
   width: 40%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-.reservation-form label {
+.booking-form label {
   padding-top: 20px;
 }
-.reservation-form button {
+.booking-form button {
   width: 50%;
   margin: 20px auto;
 }

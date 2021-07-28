@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+    <h1>ADMIN</h1>
+
+    <h3>Check day</h3>
+
+    <form action="/admin" method="POST">
+        {{ form.csrf_token }}
+
+        {{ form.date.label }}
+        {{ form.date }}
+
+        <button>Check day</button>
+    </form>
+
+    {% if msg %}
+        <h5>{{ msg }}</h5>
+    {% elif bd %}
+        {% for b in bd %}
+            <h5>BOOKING</h5>
+            <ul>
+                <li>Day - {{ b[0] }}</li>
+                <li>Date - {{ b[1] }}</li>
+                <li>Time - {{ b[2] }}</li>
+                <li>Court - {{b[3] }}</li>
+                <li>People playing - {{ b[4] }}</li>
+            </ul>
+
+            <form action="/delete" method="POST">
+                <input type="hidden" name="id" value="{{ b[5] }}">
+                <button>Delete</button>
+            </form>
+        {% endfor %}
+    {% endif %}
+
+    <h3>Create index</h3>
+    
+    <form action="/createindex" method="POST">
+        <label for="name">Index name</label>
+        <input type="text" name="name" id="name">
+
+        <label for="table">Table</label>
+        <input type="text" name="table" id="table">
+
+        <label for="columns">Columns</label>
+        <input type="text" name="columns" id="columns">
+
+        <button>Create index</button>
+    </form>
+{% endblock %}
