@@ -9,6 +9,9 @@
     <form action="/admin" method="POST">
         {{ form_check.csrf_token }}
 
+        {{ form_check.court.label }}
+        {{ form_check.court }}
+
         {{ form_check.date.label }}
         {{ form_check.date }}
 
