@@ -3,6 +3,7 @@ USERS TABLE:
             "id"    INTEGER,
             "username"      TEXT NOT NULL,
             "hash"  TEXT NOT NULL,
+            "email"  TEXT NOT NULL,
             "type" TEXT DEFAULT "user", 
             PRIMARY KEY("id")        
 		);

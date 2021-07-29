@@ -2,7 +2,19 @@
 
 {% block content %}
 
-    <h1>MY UPCOMING BOOKINGS</h1>
+    <h1>MY BOOKINGS</h1>
+
+    <form action="/mybookings" method="POST">
+        {{ form.csrf_token }}
+
+        {{ form.date.label }}
+        {{ form.date }}
+
+        <input type="submit" value="Check day" id="check_day" name="check_day">
+        <input type="submit" value="Show all" id="show_all" name="show_all">
+        <input type="submit" value="Delete day" id="delete_day" name="delete_day">
+        <input type="submit" value="Delete all" id="delete_all" name="delete_all">
+    </form>
 
     {% if msg %}
         <h4>{{ msg }}</h4>
@@ -17,7 +29,7 @@
                 <li>People playing - {{ b[4] }}</li>
             </ul>
 
-            <form action="/upcoming" method="POST">
+            <form action="/deletebooking" method="POST">
                 <input type="hidden" name="id" value="{{ b[5] }}">
                 <button>Delete</button>
             </form>

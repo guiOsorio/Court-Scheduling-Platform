@@ -1,4 +1,5 @@
 import sqlite3
+import re # regex
 
 from flask import flash, redirect, session
 from datetime import datetime
@@ -129,8 +130,22 @@ def validateLogin(username, password):
 
     return True
 
+# Regex for validating an email
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+ 
+# Function for validating an email
+def validateEmail(email):
+ 
+    # pass the regular expression
+    # and the string in search() method
+    if(re.match(regex, email)):
+        return True
+ 
+    else:
+        return False
 
-def validateRegistration(usernames, username, password, confirmation):
+
+def validateRegistration(usernames, username, password, confirmation, email):
     # Handles username already existing
         for user in usernames:
             if username in user:
@@ -145,6 +160,10 @@ def validateRegistration(usernames, username, password, confirmation):
         # Handles password and password confirmation not matching
         elif password != confirmation:
             flash("Password and confirmation fields don't match", "danger")
+            return False
+
+        elif not validateEmail(email):
+            flash("Invalid email", "danger")
             return False
         
         return True
