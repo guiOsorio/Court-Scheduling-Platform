@@ -102,6 +102,12 @@
     <h3>Total bookings</h3>
 
     <form action="/admin" method="POST">
+        <label for="court">Court</label>
+        <select name="court" id="court">
+            {% for court in courts_all %}
+                <option value="{{ court }}">{{ court }}</option>
+            {% endfor %}
+        </select>
         <label for="range">Select a date range</label>
         <select name="range" id="range">
             <option value="upcoming">Upcoming</option>
@@ -110,8 +116,12 @@
         <input type="submit" name="count_all_bookings" id="count_all_bookings" value="Count all bookings">
     </form>
 
-    {% if total_count and input_range %}
-        <p><strong>Count of {{ input_range }} bookings is {{ total_count }}</strong></p>
+    {% if total_count or total_count == 0 %}
+        {% if court == "All courts" %}
+            <p><strong>Count of {{ input_range }} bookings for {{ court }} is {{ total_count }}</strong></p>
+        {% else %}
+            <p><strong>Count of {{ input_range }} bookings for court {{ court }} is {{ total_count }}</strong></p>
+        {% endif %}
     {% endif %}
 
 

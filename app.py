@@ -328,12 +328,12 @@ def admin():
         if not bookings_data:
             if court == "All courts":
                 msg = "No bookings for the selected day"
-                return render_template("admin.html", form_court_date=form_court_date, msg=msg)
+                return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, msg=msg)
             else:
                 msg = "No bookings for this court on the selected day"
-                return render_template("admin.html", form_court_date=form_court_date, msg=msg)
+                return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, msg=msg)
         else:
-            return render_template("admin.html", form_court_date=form_court_date, bd=bookings_data)
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, bd=bookings_data)
 
     if "delete_booking" in request.form and request.method == "POST":
         booking_id = request.form.get("id")
@@ -433,38 +433,46 @@ def admin():
         if court == "All courts":
             cur.execute("SELECT COUNT(*) FROM bookings WHERE date = :date", {"date": selected_date_str})
             day_count = cur.fetchone()[0]
-            return render_template("admin.html", form_court_date=form_court_date, day_count=day_count, selected_date_str=selected_date_str)
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str)
         # else, count number of bookings for the selected day and court
         else:
             cur.execute("SELECT COUNT(*) FROM bookings WHERE date = :date AND court = :court", {"date": selected_date_str, "court": court})
             day_count = cur.fetchone()[0]
-            return render_template("admin.html", form_court_date=form_court_date, day_count=day_count, selected_date_str=selected_date_str, court=court)
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str, court=court)
 
     if "count_all_bookings" and request.method == "POST":
         
         input_range = request.form.get("range")
+        court = request.form.get("court")
+        current_time_str = datetime.now().strftime("%H:%M") # string
 
         # count number of all bookings based on input
         if input_range == "upcoming": # only count bookings for today and the future
             current_date_str = datetime.today().strftime('%Y-%m-%d')
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date >= :current_date", {"current_date": current_date_str})
-            total_count = cur.fetchone()[0]
+            if court == "All courts":
+                cur.execute("SELECT COUNT(*) FROM bookings WHERE date >= :current_date AND time > :current_time",
+                            {"current_date": current_date_str, "current_time": current_time_str})
+            else:
+                cur.execute("SELECT COUNT(*) FROM bookings WHERE date >= :current_date AND court = :court AND time > :current_time",
+                            {"current_date": current_date_str, "court": court, "current_time": current_time_str})
         elif input_range == "total": # count all bookings regardless of date
-            cur.execute("SELECT COUNT(*) FROM bookings")
-            total_count = cur.fetchone()[0]
+            if court == "All courts":
+                cur.execute("SELECT COUNT(*) FROM bookings")
+            else:
+                cur.execute("SELECT COUNT(*) FROM bookings WHERE court = :court", {"court": court})
         else:
             flash("Invalid range input")
             return redirect("/admin")
-    
-        return render_template("admin.html", form_court_date=form_court_date, total_count=total_count, input_range=input_range)
+
+        total_count = cur.fetchone()[0]
+        return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, court=court, total_count=total_count, input_range=input_range)
 
     # page load with GET
-    return render_template("admin.html", form_court_date=form_court_date)
+    return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all)
 
 
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# add courts input to count_all_bookings for admin to be able to count the bookings by court (use flask-WTForms for that form)
 # admin registering
 # store admin in session as a boolean isAdmin if type is admin when logging in
 # admin_required
