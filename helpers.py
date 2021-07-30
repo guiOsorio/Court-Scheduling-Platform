@@ -1,9 +1,10 @@
 import sqlite3
 import re # regex
+import datetime as dt
 
 from flask import flash, redirect, session
-from datetime import datetime
 from functools import wraps
+from datetime import datetime
 from werkzeug.security import check_password_hash
 
 
@@ -233,3 +234,11 @@ def makeIndex(columns, name, table):
     flash("Index created successfully", "success")
 
     return
+
+
+def validate_date(field):
+    if field.data < dt.date.today():
+        flash("The date cannot be in the past!", "danger")
+        return False
+    else:
+        return True

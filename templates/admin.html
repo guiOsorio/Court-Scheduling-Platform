@@ -7,13 +7,13 @@
     <h3>Check day</h3>
 
     <form action="/admin" method="POST">
-        {{ form_check.csrf_token }}
+        {{ form_court_date.csrf_token }}
 
-        {{ form_check.court.label }}
-        {{ form_check.court }}
+        {{ form_court_date.court.label }}
+        {{ form_court_date.court }}
 
-        {{ form_check.date.label }}
-        {{ form_check.date }}
+        {{ form_court_date.date.label }}
+        {{ form_court_date.date }}
 
         <input type="submit" id="show_day" name="show_day" value="Show day">
     </form>
@@ -60,15 +60,60 @@
     <h3>Book day</h3>
 
     <form action="/admin" method="POST">
-        {{ form_bookday.csrf_token }}
+        {{ form_court_date.csrf_token }}
 
-        {{ form_bookday.court.label }}
-        {{ form_bookday.court}}
+        {{ form_court_date.court.label }}
+        {{ form_court_date.court}}
 
-        {{ form_bookday.date.label }}
-        {{ form_bookday.date }}
+        {{ form_court_date.date.label }}
+        {{ form_court_date.date }}
 
         <input type="submit" name="book_day" id="book_day" value="Book day">
     </form>
+
+    <h3>Number of bookings per day</h3>
+
+    <form action="/admin" method="POST">
+        {{ form_court_date.csrf_token }}
+
+        {{ form_court_date.court.label }}
+        {{ form_court_date.court}}
+
+        {{ form_court_date.date.label }}
+        {{ form_court_date.date }}
+
+        <input type="submit" name="count_day_bookings" id="count_day_bookings" value="Count day's bookings">
+    </form>
+
+    {% if day_count and selected_date_str %}
+        {% if court %}
+            <p><strong>{{ day_count }} booking(s) for the {{ selected_date_str }} on court {{ court }}</strong></p>
+        {% else %}
+            <p><strong>{{ day_count }} booking(s) for the {{ selected_date_str }} on all courts</strong></p>
+        {% endif %}
+    {% elif day_count == 0 and selected_date_str %}
+        {% if court %}
+            <p><strong>{{ day_count }} booking(s) for the {{ selected_date_str }} on court {{ court }}</strong></p>
+        {% else %}
+            <p><strong>{{ day_count }} booking(s) for the {{ selected_date_str }} on all courts</strong></p>
+        {% endif %}
+    {% endif %}
+
+    <h3>Total bookings</h3>
+
+    <form action="/admin" method="POST">
+        <label for="range">Select a date range</label>
+        <select name="range" id="range">
+            <option value="upcoming">Upcoming</option>
+            <option value="total">Total</option>
+        </select>
+        <input type="submit" name="count_all_bookings" id="count_all_bookings" value="Count all bookings">
+    </form>
+
+    {% if total_count and input_range %}
+        <p><strong>Count of {{ input_range }} bookings is {{ total_count }}</strong></p>
+    {% endif %}
+
+
 
 {% endblock %}

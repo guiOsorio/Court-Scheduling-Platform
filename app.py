@@ -10,7 +10,7 @@ from datetime import datetime
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import generate_password_hash
 
-from helpers import login_required, validateBooking, validateLogin, validateRegistration, validateIndex, makeIndex
+from helpers import login_required, validateBooking, validateLogin, validateRegistration, validateIndex, makeIndex, validate_date
 
 # Initialize app
 app = Flask(__name__)
@@ -68,7 +68,7 @@ class CheckBookingsForm(FlaskForm):
     date = DateField('Date', format='%Y-%m-%d', default=datetime.now())
 
 # Admin book a court for a day form
-class CourtDayForm(FlaskForm):
+class CourtDateForm(FlaskForm):
     court = SelectField('Court', choices=courts_all)
     date = DateField('Date', format='%Y-%m-%d', default=datetime.now())
 
@@ -303,8 +303,7 @@ def mybookings():
 def admin():
 
     # Initialize forms
-    form_check = CourtDayForm()
-    form_bookday = CourtDayForm()
+    form_court_date = CourtDateForm()
 
     user_id = session["user_id"] # store current user's id
 
@@ -313,9 +312,9 @@ def admin():
     cur = con.cursor()
     
     # POST request for searching bookings for a certain day (default for today)
-    if "show_day" in request.form and form_check.validate_on_submit():
-        court = form_check.court.data
-        date = form_check.date.data # datetime.date
+    if "show_day" in request.form and form_court_date.validate_on_submit() and validate_date(form_court_date.date):
+        court = form_court_date.court.data
+        date = form_court_date.date.data # datetime.date
         selected_date = date.strftime("%Y-%m-%d") # string
 
         # Find upcoming bookings for that day if all courts option is provided
@@ -329,12 +328,12 @@ def admin():
         if not bookings_data:
             if court == "All courts":
                 msg = "No bookings for the selected day"
-                return render_template("admin.html", form_check=form_check, msg=msg, form_bookday=form_bookday)
+                return render_template("admin.html", form_court_date=form_court_date, msg=msg)
             else:
                 msg = "No bookings for this court on the selected day"
-                return render_template("admin.html", form_check=form_check, msg=msg, form_bookday=form_bookday)
+                return render_template("admin.html", form_court_date=form_court_date, msg=msg)
         else:
-            return render_template("admin.html", form_check=form_check, bd=bookings_data, form_bookday=form_bookday)
+            return render_template("admin.html", form_court_date=form_court_date, bd=bookings_data)
 
     if "delete_booking" in request.form and request.method == "POST":
         booking_id = request.form.get("id")
@@ -382,22 +381,22 @@ def admin():
         return redirect("/admin")
     
     # admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
-    if "book_day" in request.form and form_bookday.validate_on_submit(): 
+    if "book_day" in request.form and form_court_date.validate_on_submit() and validate_date(form_court_date.date): 
 
-        court = form_bookday.court.data # pass this into query
-        date = form_bookday.date.data
-        selected_date = date.strftime("%Y-%m-%d") # pass this into query
-        selected_weekday = date.strftime("%a") # pass this into query
+        court = form_court_date.court.data # pass this into query
+        selected_date = form_court_date.date.data
+        selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
+        selected_weekday = selected_date.strftime("%a") # pass this into query
         people = 4 # default when admin makes a booking
 
         # check if date is not in the past
-        current_date = datetime.today().strftime('%Y-%m-%d')
-        if selected_date < current_date:
+        current_date_str = datetime.today().strftime('%Y-%m-%d')
+        if selected_date_str < current_date_str:
             flash("Invalid date", "danger")
             return redirect("/admin")
 
         # delete every booking for the selected_date and court
-        cur.execute("DELETE FROM bookings WHERE date = :date AND court = :court", {"date": selected_date, "court": court})
+        cur.execute("DELETE FROM bookings WHERE date = :date AND court = :court", {"date": selected_date_str, "court": court})
         con.commit()
 
 
@@ -409,7 +408,7 @@ def admin():
                     continue
                 else:
                     cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court, people) VALUES (:user_id, :week_day, :date, :time, :court, :people)",
-                                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people})
+                                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court, "people": people})
                     con.commit()
         else:
             for time in possibletimes:
@@ -417,20 +416,55 @@ def admin():
                     continue
                 else:
                     cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court, people) VALUES (:user_id, :week_day, :date, :time, :court, :people)",
-                                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people})
+                                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court, "people": people})
                     con.commit()
-        flash(f"Court succesfully booked for {selected_date}", "success")
+        flash(f"Court succesfully booked for {selected_date_str}", "success")
 
         return redirect("/admin")
 
+    # count the number of bookings in a selected day
+    if "count_day_bookings" in request.form and form_court_date.validate_on_submit():
 
-    return render_template("admin.html", form_check=form_check, form_bookday=form_bookday)
+        court = form_court_date.court.data # pass this into query
+        selected_date = form_court_date.date.data
+        selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
+
+        # if "All courts" option selected, show number of bookings for all courts
+        if court == "All courts":
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = :date", {"date": selected_date_str})
+            day_count = cur.fetchone()[0]
+            return render_template("admin.html", form_court_date=form_court_date, day_count=day_count, selected_date_str=selected_date_str)
+        # else, count number of bookings for the selected day and court
+        else:
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = :date AND court = :court", {"date": selected_date_str, "court": court})
+            day_count = cur.fetchone()[0]
+            return render_template("admin.html", form_court_date=form_court_date, day_count=day_count, selected_date_str=selected_date_str, court=court)
+
+    if "count_all_bookings" and request.method == "POST":
+        
+        input_range = request.form.get("range")
+
+        # count number of all bookings based on input
+        if input_range == "upcoming": # only count bookings for today and the future
+            current_date_str = datetime.today().strftime('%Y-%m-%d')
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date >= :current_date", {"current_date": current_date_str})
+            total_count = cur.fetchone()[0]
+        elif input_range == "total": # count all bookings regardless of date
+            cur.execute("SELECT COUNT(*) FROM bookings")
+            total_count = cur.fetchone()[0]
+        else:
+            flash("Invalid range input")
+            return redirect("/admin")
+    
+        return render_template("admin.html", form_court_date=form_court_date, total_count=total_count, input_range=input_range)
+
+    # page load with GET
+    return render_template("admin.html", form_court_date=form_court_date)
 
 
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# have admin be able to search how many bookings there are for a specific day and show them and how many upcoming bookings there are in total and total bookings (past plus upcoming)
-# session not ending properly when I restart flask
+# add courts input to count_all_bookings for admin to be able to count the bookings by court (use flask-WTForms for that form)
 # admin registering
 # store admin in session as a boolean isAdmin if type is admin when logging in
 # admin_required
