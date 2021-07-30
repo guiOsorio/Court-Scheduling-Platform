@@ -15,7 +15,7 @@
         {{ form_check.date.label }}
         {{ form_check.date }}
 
-        <button>Check day</button>
+        <input type="submit" id="show_day" name="show_day" value="Show day">
     </form>
 
     <form action="/admin" method="GET">
@@ -35,16 +35,16 @@
                 <li>People playing - {{ b[4] }}</li>
             </ul>
 
-            <form action="/deletebooking" method="POST">
+            <form action="/admin" method="POST">
                 <input type="hidden" name="id" value="{{ b[5] }}">
-                <button>Delete</button>
+                <input type="submit" id="delete_booking" name="delete_booking" value="Delete booking">
             </form>
         {% endfor %}
     {% endif %}
 
     <h3>Create index</h3>
     
-    <form action="/createindex" method="POST">
+    <form action="/admin" method="POST">
         <label for="name">Index name</label>
         <input type="text" name="name" id="name">
 
@@ -54,12 +54,12 @@
         <label for="columns">Columns</label>
         <input type="text" name="columns" id="columns">
 
-        <button>Create index</button>
+        <input type="submit" id="create_index" name="create_index" value="Create index">
     </form>
 
     <h3>Book day</h3>
 
-    <form action="/bookday" method="POST">
+    <form action="/admin" method="POST">
         {{ form_bookday.csrf_token }}
 
         {{ form_bookday.court.label }}
@@ -68,7 +68,7 @@
         {{ form_bookday.date.label }}
         {{ form_bookday.date }}
 
-        <button>Book day</button>
+        <input type="submit" name="book_day" id="book_day" value="Book day">
     </form>
 
 {% endblock %}

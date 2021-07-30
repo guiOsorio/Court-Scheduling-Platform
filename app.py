@@ -111,7 +111,7 @@ def booking():
 
             flash("Booking successful!!", "success")
 
-            return redirect("/")
+            return redirect("/booking")
 
 
     return render_template("booking.html", form=form)
@@ -229,7 +229,7 @@ def mybookings():
         msg = "You have no upcoming bookings"
         return render_template("mybookings.html", form=form, msg=msg)
 
-    if "check_day" in request.form and form.validate_on_submit():
+    if "show_day" in request.form and form.validate_on_submit():
 
         date = form.date.data # datetime.date
         selected_date = date.strftime("%Y-%m-%d") # string
@@ -253,6 +253,23 @@ def mybookings():
         bookings_data = cur.fetchall()
 
         return render_template("mybookings.html", form=form, bd=bookings_data)
+    
+    if "delete_booking" in request.form and request.method == "POST":
+        booking_id = request.form.get("id")
+
+        # Delete booking
+        cur.execute("DELETE FROM bookings WHERE booking_id = :booking_id", {"booking_id": booking_id})
+        con.commit()
+        flash("Booking succesfully deleted", "success")
+
+        # get type - if type is admin, redirect to admin, if not, redirect to homepage
+        cur.execute("SELECT type FROM users WHERE id = :user_id", {"user_id": user_id})
+        type = cur.fetchone()[0]
+
+        if type == "admin":
+            return redirect("/admin")
+        else:
+            return redirect("/mybookings")
     
     if "delete_day" in request.form and form.validate_on_submit:
 
@@ -290,16 +307,16 @@ def admin():
     form_bookday = CourtDayForm()
 
     user_id = session["user_id"] # store current user's id
+
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
     
     # POST request for searching bookings for a certain day (default for today)
-    if form_check.validate_on_submit():
+    if "show_day" in request.form and form_check.validate_on_submit():
         court = form_check.court.data
         date = form_check.date.data # datetime.date
         selected_date = date.strftime("%Y-%m-%d") # string
-
-        # Connect to database
-        con = sqlite3.connect("scheduling.db")
-        cur = con.cursor()
 
         # Find upcoming bookings for that day if all courts option is provided
         if court == "All courts":
@@ -319,94 +336,70 @@ def admin():
         else:
             return render_template("admin.html", form_check=form_check, bd=bookings_data, form_bookday=form_bookday)
 
-    return render_template("admin.html", form_check=form_check, form_bookday=form_bookday)
+    if "delete_booking" in request.form and request.method == "POST":
+        booking_id = request.form.get("id")
 
+        # Delete booking
+        cur.execute("DELETE FROM bookings WHERE booking_id = :booking_id", {"booking_id": booking_id})
+        con.commit()
+        flash("Booking succesfully deleted", "success")
 
-@app.route("/deletebooking", methods=["POST"])
-@login_required
-def deletebooking():
+        # get type - if type is admin, redirect to admin, if not, redirect to homepage
+        cur.execute("SELECT type FROM users WHERE id = :user_id", {"user_id": user_id})
+        type = cur.fetchone()[0]
 
-    user_id = session["user_id"] # store current user's id
-    booking_id = request.form.get("id")
+        if type == "admin":
+            return redirect("/admin")
+        else:
+            return redirect("/mybookings")
 
-    # Connect to database
-    con = sqlite3.connect("scheduling.db")
-    cur = con.cursor()
+    if "create_index" in request.form and request.method == "POST":
 
-    # Delete booking
-    cur.execute("DELETE FROM bookings WHERE booking_id = :booking_id", {"booking_id": booking_id})
-    con.commit()
-    flash("Booking succesfully deleted", "success")
+        name = request.form.get("name")
+        table = request.form.get("table")
+        columns_input = request.form.get("columns")
 
-    # get type - if type is admin, redirect to admin, if not, redirect to homepage
-    cur.execute("SELECT type FROM users WHERE id = :user_id", {"user_id": user_id})
-    type = cur.fetchone()[0]
+        # transform columns into a list
+        columns = columns_input.split(",")
+        # remove whitespaces from each element of the list
+        i = 0
+        for column in columns:
+            columns[i] = column.strip()
+            i += 1
 
-    if type == "admin":
-        return redirect("/admin")
-    else:
-        return redirect("/")
+        # turn invalid SQL character into _
+        k = 0
+        for n in name:
+            if n == " " or n == ";" or n == ">" or n == "<" or n == ">":
+                name[k] = "_"
+            k += 1
 
+        if not validateIndex(name, table, columns_input, columns):
+            return redirect("/admin")
+        
+        makeIndex(columns, name, table)
 
-@app.route("/createindex", methods=["POST"])
-@login_required
-def createindex():
-
-    name = request.form.get("name")
-    table = request.form.get("table")
-    columns_input = request.form.get("columns")
-
-    # transform columns into a list
-    columns = columns_input.split(",")
-    # remove whitespaces from each element of the list
-    i = 0
-    for column in columns:
-        columns[i] = column.strip()
-        i += 1
-
-    # turn invalid SQL character into _
-    k = 0
-    for n in name:
-        if n == " " or n == ";" or n == ">" or n == "<" or n == ">":
-            name[k] = "_"
-        k += 1
-
-    if not validateIndex(name, table, columns_input, columns):
         return redirect("/admin")
     
-    makeIndex(columns, name, table)
+    # admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
+    if "book_day" in request.form and form_bookday.validate_on_submit(): 
 
-    return redirect("/admin")
+        court = form_bookday.court.data # pass this into query
+        date = form_bookday.date.data
+        selected_date = date.strftime("%Y-%m-%d") # pass this into query
+        selected_weekday = date.strftime("%a") # pass this into query
+        people = 4 # default when admin makes a booking
 
-
-@app.route("/bookday", methods=["POST"])
-@login_required
-def bookday():
-    # bookday route (only accepts POST) - admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
-
-    form_bookday = CourtDayForm()
-
-    user_id = session["user_id"] # store current user's id, pass this into query
-    court = form_bookday.court.data # pass this into query
-    date = form_bookday.date.data
-    selected_date = date.strftime("%Y-%m-%d") # pass this into query
-    selected_weekday = date.strftime("%a") # pass this into query
-    people = 4 # default when admin makes a booking
-
-    if form_bookday.validate_on_submit:
-
-        # Connect to database
-        con = sqlite3.connect("scheduling.db")
-        cur = con.cursor()
+        # check if date is not in the past
+        current_date = datetime.today().strftime('%Y-%m-%d')
+        if selected_date < current_date:
+            flash("Invalid date", "danger")
+            return redirect("/admin")
 
         # delete every booking for the selected_date and court
         cur.execute("DELETE FROM bookings WHERE date = :date AND court = :court", {"date": selected_date, "court": court})
         con.commit()
 
-        # check if date is not in the past
-        current_year = datetime.now().year # int
-        current_month = datetime.now().month # int
-        current_day = datetime.now().day # int
 
         # use a for loop to make a booking for every possible time in the day for the selected court
         # (use array possibletimes for week days and possibletimesweekend if the selected_weekday is a weekend day)
@@ -428,12 +421,14 @@ def bookday():
                     con.commit()
         flash(f"Court succesfully booked for {selected_date}", "success")
 
-    return redirect("/admin")
+        return redirect("/admin")
+
+
+    return render_template("admin.html", form_check=form_check, form_bookday=form_bookday)
 
 
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# change admin forms to submit to /admin and figure it out by input submit id
 # have admin be able to search how many bookings there are for a specific day and show them and how many upcoming bookings there are in total and total bookings (past plus upcoming)
 # session not ending properly when I restart flask
 # admin registering

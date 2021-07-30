@@ -10,7 +10,7 @@
         {{ form.date.label }}
         {{ form.date }}
 
-        <input type="submit" value="Check day" id="check_day" name="check_day">
+        <input type="submit" value="Show day" id="show_day" name="show_day">
         <input type="submit" value="Show all" id="show_all" name="show_all">
         <input type="submit" value="Delete day" id="delete_day" name="delete_day">
         <input type="submit" value="Delete all" id="delete_all" name="delete_all">
@@ -29,9 +29,9 @@
                 <li>People playing - {{ b[4] }}</li>
             </ul>
 
-            <form action="/deletebooking" method="POST">
+            <form action="/mybookings" method="POST">
                 <input type="hidden" name="id" value="{{ b[5] }}">
-                <button>Delete</button>
+                <input type="submit" id="delete_booking" name="delete_booking" value="Delete">
             </form>
         {% endfor %}
     {% endif %}
