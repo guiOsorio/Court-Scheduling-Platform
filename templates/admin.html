@@ -28,15 +28,16 @@
         {% for b in bd %}
             <h5>BOOKING</h5>
             <ul>
-                <li>Day - {{ b[0] }}</li>
-                <li>Date - {{ b[1] }}</li>
-                <li>Time - {{ b[2] }}</li>
-                <li>Court - {{b[3] }}</li>
-                <li>People playing - {{ b[4] }}</li>
+                <li>User - {{ b[0] }}</li>
+                <li>Day - {{ b[1] }}</li>
+                <li>Date - {{ b[2] }}</li>
+                <li>Time - {{ b[3] }}</li>
+                <li>Court - {{b[4] }}</li>
+                <li>People playing - {{ b[5] }}</li>
             </ul>
 
             <form action="/admin" method="POST">
-                <input type="hidden" name="id" value="{{ b[5] }}">
+                <input type="hidden" name="id" value="{{ b[6] }}">
                 <input type="submit" id="delete_booking" name="delete_booking" value="Delete booking">
             </form>
         {% endfor %}
