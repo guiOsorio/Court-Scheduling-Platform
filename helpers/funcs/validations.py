@@ -2,33 +2,9 @@ import sqlite3
 import re # regex
 import datetime as dt
 
-from flask import flash, redirect, session
-from functools import wraps
+from flask import flash
 from datetime import datetime
 from werkzeug.security import check_password_hash
-
-
-def login_required(f):
-    """
-    Decorate routes to require login.
-
-    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
-    """
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            flash("Login required", "danger")
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated_function
-
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get("isAdmin"):
-            return redirect("/")
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
@@ -223,34 +199,6 @@ def validateIndex(name, table, columns_input, columns):
             return False
 
     return True
-
-
-def makeIndex(columns, name, table):
-    # CREATE INDEX
-
-    # Connect to database
-    con = sqlite3.connect("scheduling.db")
-    cur = con.cursor()
-
-    num_of_columns = len(columns)
-    if num_of_columns == 1:
-        cur.execute("CREATE UNIQUE INDEX "+name+" ON "+table+" ("+columns[0]+")")
-    elif num_of_columns == 2:
-        cur.execute("CREATE UNIQUE INDEX "+name+" ON "+table+" ("+columns[0]+", "+columns[1]+")")
-    elif num_of_columns == 3:
-        cur.execute("CREATE UNIQUE INDEX "+name+" ON "+table+" ("+columns[0]+", "+columns[1]+", "+columns[2]+")")
-    elif num_of_columns == 4:
-        cur.execute("CREATE UNIQUE INDEX "+name+" ON "+table+" ("+columns[0]+", "+columns[1]+", "+columns[2]+", "+columns[3]+")")
-    elif num_of_columns == 5:
-        cur.execute("CREATE UNIQUE INDEX "+name+" ON "+table+" ("+columns[0]+", "+columns[1]+", "+columns[2]+", "+columns[3]+", "+columns[4]+")")
-    else:
-        flash("Too many columns", "danger")
-        return
-
-    con.commit()
-    flash("Index created successfully", "success")
-
-    return
 
 
 def validateDate(field):
