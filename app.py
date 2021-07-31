@@ -1,5 +1,4 @@
 import os
-import sqlite3
 
 from flask import Flask, flash, redirect, render_template, session, request
 from flask_session import Session
@@ -235,10 +234,6 @@ def admin():
     form_court_date = CourtDateForm()
 
     user_id = session["user_id"] # store current user's id
-
-    # Connect to database
-    con = sqlite3.connect("scheduling.db")
-    cur = con.cursor()
     
     # POST request for searching bookings for a certain day (default for today)
     if "show_day" in request.form and form_court_date.validate_on_submit():
