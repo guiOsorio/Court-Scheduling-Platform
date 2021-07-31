@@ -22,6 +22,14 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("isAdmin"):
+            return redirect("/")
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
     if people == "" or court == "" or date == "" or time == "Choose a time":
@@ -136,13 +144,23 @@ regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
  
 # Function for validating an email
 def validateEmail(email):
- 
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    # check if email already exists
+    cur.execute("SELECT * FROM users WHERE email = :email", {"email": email})
+    query_email = cur.fetchone()
+
+    if query_email:
+        flash("Email already taken", "danger")
+        return False
     # pass the regular expression
     # and the string in search() method
     if(re.match(regex, email)):
         return True
- 
     else:
+        flash("Invalid email", "danger")
         return False
 
 
@@ -164,7 +182,6 @@ def validateRegistration(usernames, username, password, confirmation, email):
             return False
 
         elif not validateEmail(email):
-            flash("Invalid email", "danger")
             return False
         
         return True
@@ -236,7 +253,7 @@ def makeIndex(columns, name, table):
     return
 
 
-def validate_date(field):
+def validateDate(field):
     if field.data < dt.date.today():
         flash("The date cannot be in the past!", "danger")
         return False

@@ -34,7 +34,9 @@
                     <li class="nav-item"><a class="nav-link" href="/mybookings">My bookings</a></li>
                 </ul>
                 <ul class="navbar-nav ml-auto mt-2">
+                    {% if session.isAdmin %}
                     <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                 </ul>
             {% else %}

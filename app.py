@@ -10,13 +10,16 @@ from datetime import datetime
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import generate_password_hash
 
-from helpers import login_required, validateBooking, validateLogin, validateRegistration, validateIndex, makeIndex, validate_date
+from helpers import login_required, admin_required, validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, makeIndex, validateDate
 
 # Initialize app
 app = Flask(__name__)
 
 # Configure for flask_wtf
 app.config["SECRET_KEY"] = "secret"
+
+# Get environment variables
+ADMIN_SECRET_PASSWORD = os.environ.get('ADMIN_SECRET_PASSWORD')
 
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
@@ -145,6 +148,17 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = id
+
+        # Get type of user
+        cur.execute("SELECT type FROM users WHERE id = :id", {"id": id})
+        type = cur.fetchone()[0]
+
+        # if user is of admin type, set isAdmin to true, else set it to false
+        if type == "admin":
+            session["isAdmin"] = True
+        else:
+            session["isAdmin"] = False
+
 
         return redirect("/")
 
@@ -300,6 +314,7 @@ def mybookings():
 
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
+@admin_required
 def admin():
 
     # Initialize forms
@@ -312,7 +327,7 @@ def admin():
     cur = con.cursor()
     
     # POST request for searching bookings for a certain day (default for today)
-    if "show_day" in request.form and form_court_date.validate_on_submit() and validate_date(form_court_date.date):
+    if "show_day" in request.form and form_court_date.validate_on_submit() and validateDate(form_court_date.date):
         court = form_court_date.court.data
         date = form_court_date.date.data # datetime.date
         selected_date = date.strftime("%Y-%m-%d") # string
@@ -381,7 +396,7 @@ def admin():
         return redirect("/admin")
     
     # admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
-    if "book_day" in request.form and form_court_date.validate_on_submit() and validate_date(form_court_date.date): 
+    if "book_day" in request.form and form_court_date.validate_on_submit() and validateDate(form_court_date.date): 
 
         court = form_court_date.court.data # pass this into query
         selected_date = form_court_date.date.data
@@ -471,10 +486,46 @@ def admin():
     return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all)
 
 
+@app.route("/makeadmin", methods=["GET", "POST"])
+@login_required
+def makeadmin():
+
+    if "make_admin" in request.form and request.method == "POST":
+        secret_password = request.form.get("secretpassword")
+        # if the secret password is correct, proceed to create new admin account
+        if secret_password == ADMIN_SECRET_PASSWORD:
+            admin_username = request.form.get("username")
+            admin_password = request.form.get("password")
+            email = request.form.get("email")
+
+            # Connect to database
+            con = sqlite3.connect("scheduling.db")
+            cur = con.cursor()
+
+            # get all usernames
+            cur.execute("SELECT username FROM users")
+            usernames = cur.fetchall()
+            confirmation = admin_password
+
+            if not validateEmail(email) or not validateRegistration(usernames, admin_username, admin_password, confirmation, email):
+                return redirect("/makeadmin")
+            else:
+                # hash password and store it in hashed_password variable
+                hashed_password = generate_password_hash(admin_password)
+                type = "admin"
+                cur.execute(""" INSERT INTO users (username, hash, email, type) VALUES (:username, :hashed_password, :email, :type) """,
+                            {"username": admin_username, "hashed_password": hashed_password, "email": email, "type": type})
+                con.commit()
+                flash("Account successfully created", "success")
+        else:
+            flash("Invalid secret password", "danger")
+            return redirect("/")
+
+    return render_template("makeadmin.html")
+
+
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# admin registering
-# store admin in session as a boolean isAdmin if type is admin when logging in
-# admin_required
 # create helpers folder with files such as validations.py (to store validation functions), required.py (to store required functions like login_required), and more if necessary
+# clean up code to store in helpers folder
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
