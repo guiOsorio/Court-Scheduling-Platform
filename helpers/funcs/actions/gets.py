@@ -181,3 +181,17 @@ def getUserId(booking_id):
     con.close()
 
     return id
+
+
+def getBookingId(court, selected_date, time):
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT booking_id FROM bookings WHERE court = :court AND date = :selected_date AND time = :time",
+                {"court": court, "selected_date": selected_date, "time": time})
+    booking_id = cur.fetchone()[0]
+
+    con.close()
+
+    return booking_id
