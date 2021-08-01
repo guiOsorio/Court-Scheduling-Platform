@@ -4,3 +4,4 @@ wtforms
 datetime
 sqlite3
 os
+flask_mail

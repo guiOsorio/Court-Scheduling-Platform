@@ -1,6 +1,7 @@
 from helpers.funcs.actions.gets import getCurrDate
 from flask import flash
 
+
 def isDatePast(selected_date_str):
     # check if date is not in the past
     current_date_str = getCurrDate()

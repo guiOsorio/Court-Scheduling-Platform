@@ -6,12 +6,12 @@ from flask_wtf import FlaskForm
 from wtforms.fields.html5 import DateField
 from wtforms import SelectField
 from datetime import datetime
-from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
+from flask_mail import Mail, Message
 # Own helper funcs
 from helpers.funcs.actions.creates import createIndex, createBooking, createUser, createAccount, bookAllDay
 from helpers.funcs.actions.deletes import deleteBookings
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
-    getBookingsData, getDayBookingsCount, getAllBookingsCount
+    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId
 from helpers.funcs.others import isDatePast
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate
 from helpers.funcs.requireds import login_required, admin_required
@@ -32,6 +32,15 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Configure flask_mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+mail = Mail(app)
+
 # FLASK-WTF FORMS
 # Booking form
 class BookingForm(FlaskForm):
@@ -49,7 +58,15 @@ class CourtDateForm(FlaskForm):
     court = SelectField('Court', choices=courts_all)
     date = DateField('Date', format='%Y-%m-%d', default=datetime.now())
 
+# Function to send an email
+def sendEmail(title, text, email):
+    msg = Message(title, recipients=[email])
+    msg.html = text
+    mail.send(msg)
+    return
 
+
+#  ----------------------------------------------------------------------------------ROUTES--------------------------------------------------------------------------------------------
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
@@ -139,6 +156,12 @@ def register():
             # Remember which user has logged in
             session["user_id"] = id
 
+            # get email and send registration confirmation
+            email = getUserEmail(id)
+            msg = Message("Welcome to Scheduling", recipients=[email])
+            msg.html = "<p>Your account was successfully created</p>"
+            mail.send(msg)
+
             return redirect("/")
 
     return render_template("register.html")
@@ -202,6 +225,11 @@ def mybookings():
         booking_id = request.form.get("id")
         deleteBookings(booking_id)
 
+        email = getUserEmail(user_id)
+        title = "Booking Deleted"
+        msg = "<p>One of your bookings was deleted</p>"
+        sendEmail(title, msg, email)
+
         type = getUserType(user_id)
 
         if type == "admin":
@@ -215,10 +243,20 @@ def mybookings():
 
         deleteBookings(None, user_id, selected_date)
 
+        email = getUserEmail(user_id)
+        title = f"All {selected_date} Bookings Deleted"
+        msg = f"<p>All of your bookings for {selected_date} were deleted</p>"
+        sendEmail(title, msg, email)
+
         return render_template("mybookings.html", form=form)
     
     if "delete_all" in request.form:
         deleteBookings(None, user_id)
+
+        email = getUserEmail(user_id)
+        title = "All Bookings Deleted"
+        msg = "<p>All of your bookings were deleted</p>"
+        sendEmail(title, msg, email)
 
         return render_template("mybookings.html", form=form)
     
@@ -255,7 +293,24 @@ def admin():
 
     if "delete_booking" in request.form and request.method == "POST":
         booking_id = request.form.get("id")
+        booking_info = getBookingInfo(booking_id) # get court, date, time
+
+        # get id of user who had made the booking
+        id = getUserId(booking_id)
         deleteBookings(booking_id)
+        
+        court = booking_info[0][0]
+        date = booking_info[0][1]
+        time = booking_info[0][2]
+        email = getUserEmail(id)
+        title = "Booking Deleted"
+        msg = f"<p>Your booking for court {court} on {date} at {time} was deleted by an admin</p>"
+        sendEmail(title, msg, email)
+
+        admin_email = getUserEmail(user_id)
+        admin_title = "Booking Deleted"
+        admin_msg = "<p>One booking was deleted</p>"
+        sendEmail(admin_title, admin_msg, admin_email)
 
         # get type - if type is admin, redirect to admin, if not, redirect to homepage
         type = getUserType(user_id)
@@ -305,6 +360,11 @@ def admin():
         # Delete existing bookings and book for all possible day times
         deleteBookings(None, None, selected_date_str, court)
         bookAllDay(selected_weekday, possibletimesweekend, user_id, selected_date_str, court, people, possibletimes)
+
+        email = getUserEmail(user_id)
+        title = "Day Booked"
+        msg = f"<p>All times for {court} on {selected_date_str} are now booked</p>"
+        sendEmail(title, msg, email)
 
         return redirect("/admin")
 
@@ -362,6 +422,15 @@ def makeadmin():
             else:
                 isAdmin = True
                 createAccount(admin_password, admin_username, email, isAdmin)
+                # Email new admin
+                title = "Admin Created"
+                msg = f"<p>Admin {admin_username} created</p>"
+                sendEmail(title, msg, email)
+                # Email user who created new admin
+                user_email = getUserEmail(id)
+                second_title = "Admin Created"
+                second_msg = f"<p>Admin {admin_username} created</p>"
+                sendEmail(second_title, second_msg, user_email)
         else:
             flash("Invalid secret password", "danger")
             return redirect("/")
@@ -369,7 +438,20 @@ def makeadmin():
     return render_template("makeadmin.html")
 
 
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# show username of person who booked court on admin's bookings search
+
+# send me an email when an booking or cancellation is made, with the action's info
+# send email to user after a booking is made
+# send email to user if one of its bookings are cancelled (both by the user himself or an admin)
+# if there are bookings in the next hour, send admin an email with all the bookings
+# if a user has a booking in the next hour, send him an email
+# allow users to delete their account (delete all bookings for the account when the account is deleted and send a confirmation email)
+# allow users to change their passwords on the app (need current password confirmation) or by email
+
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

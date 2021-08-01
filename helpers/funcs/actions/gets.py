@@ -142,3 +142,42 @@ def getAllBookingsCount(input_range, court, current_time_str):
     con.close()
 
     return return_data
+
+
+def getUserEmail(user_id):
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT email FROM users WHERE id = :id", {"id": user_id})
+    email = cur.fetchone()[0]
+
+    con.close()
+
+    return email
+
+
+def getBookingInfo(booking_id):
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT court, date, time FROM bookings WHERE booking_id = :booking_id", {"booking_id": booking_id})
+    booking_info = cur.fetchall()
+
+    con.close()
+
+    return booking_info
+
+
+def getUserId(booking_id):
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT id FROM users JOIN bookings ON id = user_id WHERE booking_id = :booking_id", {"booking_id": booking_id})
+    id = cur.fetchone()[0]
+
+    con.close()
+
+    return id
