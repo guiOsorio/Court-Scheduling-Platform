@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+    <h1>Manage your account</h1>
+
+    <h3>Change password</h3>
+
+    <form action="/account" method="POST">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+
+        <label for="newpassword">New Password</label>
+        <input type="password" name="newpassword" id="newpassword">
+
+        <label for="confirmation">Confirm new password</label>
+        <input type="password" name="confirmation" id="confirmation">
+
+        <input type="submit" id="changepassword" name="changepassword" value="Change password">
+    </form>
+
+    <h3>Delete account</h3>
+
+    <form action="/account" method="POST">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+
+        <input type="submit" id="deleteaccount" name="deleteaccount" value="Delete">
+    </form>
+
+{% endblock %}

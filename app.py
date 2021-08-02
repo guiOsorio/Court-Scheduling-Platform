@@ -9,10 +9,11 @@ from datetime import datetime
 from flask_mail import Mail, Message
 # Own helper funcs
 from helpers.funcs.actions.creates import createIndex, createBooking, createUser, createAccount, bookAllDay
-from helpers.funcs.actions.deletes import deleteBookings
+from helpers.funcs.actions.deletes import deleteBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
-    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId
-from helpers.funcs.others import isDatePast
+    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername
+from helpers.funcs.actions.updates import updateUserPassword
+from helpers.funcs.others import isDatePast, passwordEqualsHash
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate
 from helpers.funcs.requireds import login_required, admin_required
 # Own helper lists
@@ -40,6 +41,9 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 mail = Mail(app)
+
+# Store program's name
+appname = "Scheduling"
 
 # FLASK-WTF FORMS
 # Booking form
@@ -446,6 +450,50 @@ def makeadmin():
     return render_template("makeadmin.html")
 
 
+@app.route("/account", methods=["GET", "POST"])
+@login_required
+def account():
+    user_id = session["user_id"]
+
+    if request.method == "POST":
+        # Store variables common to all form submits
+        password = request.form.get("password")
+        username = getUsername(user_id)
+        recipient = getUserEmail(user_id)
+
+        if "changepassword" in request.form:
+            newpassword = request.form.get("newpassword")
+            confirmation = request.form.get("confirmation")
+
+            if newpassword.split() == "" or confirmation.split() == "":
+                flash("New password cannot be null", "danger")
+                return redirect("/account")
+            elif newpassword != confirmation:
+                flash("New password and confirmation don't match", "danger")
+                return redirect("/account")
+            else: # check if password hash matches current hash, if it does, change user's password
+                if passwordEqualsHash(user_id, password):
+                    updateUserPassword(newpassword, user_id)
+                    flash("Password successfuly updated", "success")
+                    title = f"{appname} - Password modified"
+                    msg = f"<p>The password for {username} was modified</p>"
+                    sendEmail(title, msg, recipient)
+                return redirect("/account")
+
+        if "deleteaccount" in request.form:
+            if deleteUserAccount(user_id, password):
+                # Email new admin
+                title = f"Goodbye from {appname}"
+                msg = f"<p>Your account {username} was deleted</p>"
+                sendEmail(title, msg, recipient)
+
+                session.clear()
+
+                return redirect("/login")
+
+    return render_template("account.html")
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -454,11 +502,26 @@ if __name__ == '__main__':
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# if there are bookings in the next hour, send admin an email with all the bookings
-# if a user has a booking in the next hour, send him an email
-# allow users to delete their account (delete all bookings for the account when the account is deleted and send a confirmation email)
-# allow users to change their passwords on the app (need current password confirmation) or by email
-# change email format to '%m-%d-%Y' when sending/showing to user
-# move email functionality to its own file
+# Monday
+    # move email functionality to its own file
+# PostgreSQL - Tuesday/Wednesday
+    # have app be on PostgreSQL and change dates to be of DATE type and update schema for PostgreSQL
+    # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime + pytz
+    # specify Portuguese time zone for time
+    # change date lists to be of date type, not string
+    # change bookings to be of 1 hour instead of 30 minutes, while still allowing appointments to start at hour:00 and hour:30 (don't forget to update booking validation)
+    # make sure updates to the rest of the code are made and work
+    # improve email messages
+# Scheduler - AWS Lambda - Wednesday
+    # if there are bookings in the next hour, send admin an email with all the bookings
+    # if a user has a booking in the next hour, send him an email
+# Pre-Deployment - Thursday
+    # session not ending properly when I restart flask
+    # test entire app
+    # basic styling (with SASS and JS where necessary + Bootstrap)
+    # have a detailed Readme
+# Deployment - Friday
+    # clear database and create indexes where necessary
+    # deploy and show to Luis
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

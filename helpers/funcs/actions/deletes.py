@@ -2,12 +2,14 @@ import sqlite3
 
 from flask import flash
 from helpers.funcs.actions.gets import getCurrDate
+from werkzeug.security import check_password_hash
+
 
 
 
 def deleteBookings(booking_id, user_id = None, selected_date = None, court = None):
     # Connect to database
-    con = sqlite3.connect("scheduling.db", check_same_thread=False)
+    con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
     # Delete booking
@@ -34,3 +36,32 @@ def deleteBookings(booking_id, user_id = None, selected_date = None, court = Non
     con.close()
 
     return
+
+def deleteUserAccount(user_id, password):
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    # Ensure password was submitted
+    if not password:
+        flash("Must have a password", "danger")
+        return False
+
+    # Check if password is valid
+    cur.execute("SELECT hash FROM users WHERE id = :user_id", {"user_id": user_id})
+    hash = cur.fetchone()[0]
+    if not check_password_hash(hash, password):
+        flash("Invalid password", "danger")
+        return False
+    
+    # Delete all bookings for the account
+    cur.execute("DELETE FROM bookings WHERE user_id = :user_id", {"user_id": user_id})
+    con.commit()
+
+    # Delete account
+    cur.execute("DELETE FROM users WHERE id = :user_id", {"user_id": user_id})
+    con.commit()
+
+    con.close()
+
+    return True

@@ -4,7 +4,7 @@ import datetime as dt
 
 from flask import flash
 from datetime import datetime
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash # (hash, password) checks if password matches the hash
 
 
 def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):

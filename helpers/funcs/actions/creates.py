@@ -5,7 +5,7 @@ from flask import flash
 
 def createIndex(columns, name, table):
     # Connect to database
-    con = sqlite3.connect("scheduling.db", check_same_thread=False)
+    con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
     num_of_columns = len(columns)
@@ -33,7 +33,7 @@ def createIndex(columns, name, table):
 
 def createBooking(date, user_id, selected_date, time, court, people):
     # Connect to database
-    con = sqlite3.connect("scheduling.db", check_same_thread=False)
+    con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
     selected_weekday = date.strftime("%A") # string current day of the week
@@ -52,7 +52,7 @@ def createBooking(date, user_id, selected_date, time, court, people):
 
 def createUser(username):
     # Connect to database
-    con = sqlite3.connect("scheduling.db", check_same_thread=False)
+    con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
     # Get id of user who logged in to store in the session
@@ -70,7 +70,7 @@ def createUser(username):
 # returns the newly created user's id
 def createAccount(password, username, email, isAdmin = False):
     # Connect to database
-    con = sqlite3.connect("scheduling.db", check_same_thread=False)
+    con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
     hashed_password = generate_password_hash(password) # hash 
@@ -95,7 +95,7 @@ def createAccount(password, username, email, isAdmin = False):
 
 def bookAllDay(selected_weekday, possibletimesweekend, user_id, selected_date_str, court, people, possibletimes):
     # Connect to database
-    con = sqlite3.connect("scheduling.db", check_same_thread=False)
+    con = sqlite3.connect("scheduling.db")
     cur = con.cursor()
 
     # use a for loop to make a booking for every possible time in the day for the selected court
