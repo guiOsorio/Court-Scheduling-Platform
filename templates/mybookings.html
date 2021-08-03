@@ -12,7 +12,18 @@
 
         <input type="submit" value="Show day" id="show_day" name="show_day">
         <input type="submit" value="Show upcoming" id="show_upcoming" name="show_upcoming">
+    </form>
+
+    <form action="/api/deletedaybookings" method="POST">
+        {{ form.csrf_token }}
+
+        {{ form.date.label }}
+        {{ form.date }}
+
         <input type="submit" value="Delete day" id="delete_day" name="delete_day">
+    </form>
+
+    <form action="/api/deleteallbookings" method="POST">
         <input type="submit" value="Delete all" id="delete_all" name="delete_all">
     </form>
 
@@ -29,7 +40,7 @@
                 <li>People playing - {{ b[4] }}</li>
             </ul>
 
-            <form action="/mybookings" method="POST">
+            <form action="/api/deletebooking" method="POST">
                 <input type="hidden" name="id" value="{{ b[5] }}">
                 <input type="submit" id="delete_booking" name="delete_booking" value="Delete">
             </form>

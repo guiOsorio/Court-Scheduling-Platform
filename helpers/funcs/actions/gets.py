@@ -123,20 +123,26 @@ def getAllBookingsCount(input_range, court, current_time_str):
     if input_range == "upcoming": # only count bookings for today and the future
         current_date_str = getCurrDate()
         if court == "All courts":
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date >= :current_date AND time > :current_time",
-                        {"current_date": current_date_str, "current_time": current_time_str})
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date > :current_date", {"current_date": current_date_str})
+            total_count = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = :current_date AND time > :current_time", {"current_date": current_date_str, "current_time": current_time_str})
+            total_count += cur.fetchone()[0]
         else:
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date >= :current_date AND court = :court AND time > :current_time",
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date > :current_date AND court = :court", {"current_date": current_date_str, "court": court})
+            total_count = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = :current_date AND court = :court AND time > :current_time",
                         {"current_date": current_date_str, "court": court, "current_time": current_time_str})
+            total_count += cur.fetchone()[0]
     elif input_range == "total": # count all bookings regardless of date
         if court == "All courts":
             cur.execute("SELECT COUNT(*) FROM bookings")
+            total_count = cur.fetchone()[0]
         else:
             cur.execute("SELECT COUNT(*) FROM bookings WHERE court = :court", {"court": court})
+            total_count = cur.fetchone()[0]
     else:
         isRangeValid = False
 
-    total_count = cur.fetchone()[0]
     return_data = [isRangeValid, total_count]
 
     con.close()

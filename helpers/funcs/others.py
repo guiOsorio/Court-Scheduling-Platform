@@ -31,3 +31,26 @@ def passwordEqualsHash(user_id, password):
     con.close()
 
     return True
+
+
+def doesBookingIdExist(booking_id):
+    # Connect to database
+    con = sqlite3.connect("scheduling.db")
+    cur = con.cursor()
+
+    booking_id = int(booking_id)
+    # Check if booking id exists
+    cur.execute("SELECT booking_id FROM bookings")
+    allbookings = cur.fetchall()
+    tracker = False # if corresponding booking_id is found, set tracker to True
+    for booking in allbookings:
+        if booking[0] == booking_id:
+            tracker = True
+            break
+        else:
+            continue
+    if not tracker:
+        flash(f"Invalid booking id", "danger")
+        return False
+    else:
+        return True

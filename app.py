@@ -9,13 +9,13 @@ from datetime import datetime
 from flask_mail import Mail, Message
 # Own helper funcs
 from helpers.funcs.actions.creates import createIndex, createBooking, createUser, createAccount, bookAllDay
-from helpers.funcs.actions.deletes import deleteBookings, deleteUserAccount
+from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, deleteAllUserBookings, deleteAllDayBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
     getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername
 from helpers.funcs.actions.updates import updateUserPassword
-from helpers.funcs.others import isDatePast, passwordEqualsHash
+from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate
-from helpers.funcs.requireds import login_required, admin_required
+from helpers.funcs.requireds import login_required, admin_required, not_logged_in
 # Own helper lists
 from helpers.variables.lists import numofpeople, courts, courts_all, possibletimes, possibletimesweekend
 
@@ -113,10 +113,8 @@ def makebooking():
 
 
 @app.route("/login", methods=["GET", "POST"])
+@not_logged_in
 def login():
-
-    # Forget any user_id
-    session.clear()
 
     if request.method == "POST":
 
@@ -124,7 +122,7 @@ def login():
         password = request.form.get("password")
 
         if not validateLogin(username, password):
-            return render_template("login.html")
+            return redirect("/login")
         
         id = createUser(username)
 
@@ -145,20 +143,21 @@ def login():
 
 
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET"])
 def register():
+    return render_template("register.html")
 
+@app.route("/api/createaccount", methods=["POST"])
+def create_account():
     if request.method == "POST":
-
         username = request.form.get("username")
         password = request.form.get("password")
         confirmation = request.form.get("pswdconf")
         email = request.form.get("email")
-
         usernames = getAllUsernames()
 
         if not validateRegistration(usernames, username, password, confirmation, email):
-            return render_template("register.html")
+            return redirect("/register")
 
         # Successful registering
         else:
@@ -173,8 +172,6 @@ def register():
             recipient = getUserEmail(id)
             sendEmail(title, msg, recipient)
             return redirect("/")
-
-    return render_template("register.html")
 
 
 @app.route("/logout")
@@ -201,11 +198,7 @@ def mybookings():
 
     upcoming_user_bookings = getUpcomingUserBookings(user_id, current_date_str)
 
-    # check if there are any upcoming bookings, if not, return no upcoming bookings for {user}
-    if upcoming_user_bookings == 0:
-        msg = "You have no upcoming bookings"
-        return render_template("mybookings.html", form=form, msg=msg)
-
+    # Shows the user's bookings for a selected day
     if "show_day" in request.form and form.validate_on_submit():
         date = form.date.data # datetime.date
         selected_date = date.strftime("%Y-%m-%d") # string
@@ -219,7 +212,8 @@ def mybookings():
         else:
             return render_template("mybookings.html", form=form, bd=bookings_data)
 
-    if "show_upcoming" in request.form:
+    # Shows all of the user's upcoming bookings
+    if "show_upcoming" in request.form and form.validate_on_submit():
         # Get user data for all of the user's upcoming bookings
         showAll = True
         selected_date = None
@@ -230,49 +224,101 @@ def mybookings():
             return render_template("mybookings.html", form=form, msg=msg)
         else:
             return render_template("mybookings.html", form=form, bd=bookings_data)
+
+    # check if there are any upcoming bookings, if not, return no upcoming bookings for {user}
+    if upcoming_user_bookings == 0:
+        msg = "You have no upcoming bookings"
+        return render_template("mybookings.html", form=form, msg=msg)
     
+    return render_template("mybookings.html", form=form)
+
+@app.route("/api/deletebooking", methods=["POST"])
+@login_required
+def delete_booking():
+    user_id = session["user_id"] # store current user's id
+
+    # Request to delete a single booking coming from /mybookings
     if "delete_booking" in request.form and request.method == "POST":
         booking_id = request.form.get("id")
-        deleteBookings(booking_id)
 
-        
+        # Check if booking id is valid
+        if not doesBookingIdExist(booking_id):
+            return redirect("/mybookings")
+
+        deleteBooking(booking_id)                                                                        
         title = "Booking Deleted"
         msg = "<p>One of your bookings was deleted</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
-        type = getUserType(user_id)
+        return redirect("/mybookings")
 
-        if type == "admin":
+    # Request to delete a single booking coming from /admin
+    if "admin_delete_booking" in request.form and request.method == "POST":
+        booking_id = request.form.get("id")
+        # Check if booking id is valid
+        if not doesBookingIdExist(booking_id):
             return redirect("/admin")
-        else:
-            return redirect("/mybookings")
-    
-    if "delete_day" in request.form and form.validate_on_submit:
+        booking_info = getBookingInfo(booking_id) # get court, date, time
+        # Check if deletion is valid
+        deleteBooking(booking_id)                                                           
+        court = booking_info[0][0]
+        date = booking_info[0][1]
+        time = booking_info[0][2]
+        # get id of user who had made the booking
+        id = getUserId(booking_id)
+
+        title = "Booking Deleted"
+        msg = f"<p>Your booking for court {court} on {date} at {time} was deleted by an admin</p>"
+        recipient = getUserEmail(id)
+        sendEmail(title, msg, recipient)
+
+        admin_title = "Booking Deleted"
+        admin_msg = "<p>You deleted a booking using your admin power</p>"
+        admin_email = getUserEmail(user_id)
+        sendEmail(admin_title, admin_msg, admin_email)
+
+        return redirect("/admin")
+
+@app.route("/api/deletedaybookings", methods=["POST"])
+@login_required
+def delete_day_bookings():
+    user_id = session["user_id"] # store current user's id
+    form = CheckBookingsForm()
+
+    # Deletes all of the user's bookings for a selected day
+    if "delete_day" in request.form and form.validate_on_submit():
         date = form.date.data # datetime.date
         selected_date = date.strftime("%Y-%m-%d") # string
 
-        deleteBookings(None, user_id, selected_date)
+        if isDatePast(selected_date):
+            return redirect("/mybookings")
+        
+        deleteUserDayBookings(user_id, selected_date)                                  
 
         title = f"All {selected_date} Bookings Deleted"
         msg = f"<p>All of your bookings for {selected_date} were deleted</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
-        return render_template("mybookings.html", form=form)
-    
-    if "delete_all" in request.form:
-        deleteBookings(None, user_id)
+        return redirect("/mybookings")
+
+@app.route("/api/deleteallbookings", methods=["POST"])
+@login_required
+def delete_all_bookings():
+    user_id = session["user_id"] # store current user's id
+
+    # Request to delete all bookings for the user, coming from /mybookings
+    if "delete_all" in request.form and request.method == "POST":
+        deleteAllUserBookings(user_id)
 
         title = "All Bookings Deleted"
         msg = "<p>All of your bookings were deleted</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
-        return render_template("mybookings.html", form=form)
-    
-    return render_template("mybookings.html", form=form)
-
+        return redirect("/mybookings")
+       
 
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
@@ -302,35 +348,72 @@ def admin():
         else:
             return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, bd=bookings_data)
 
-    if "delete_booking" in request.form and request.method == "POST":
-        booking_id = request.form.get("id")
-        booking_info = getBookingInfo(booking_id) # get court, date, time
+    # count the number of bookings for a selected court on a selected day
+    if "count_day_bookings" in request.form and form_court_date.validate_on_submit():
+        court = form_court_date.court.data # pass this into query
+        selected_date = form_court_date.date.data
+        selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
 
-        # get id of user who had made the booking
-        id = getUserId(booking_id)
-        deleteBookings(booking_id)
+        day_count = getDayBookingsCount(court, selected_date_str)
+
+        if court == "All courts":
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str)
+        else:
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str, court=court)
+
+    # counts all the bookings for the selected court
+    if "count_all_bookings" and request.method == "POST":
         
-        court = booking_info[0][0]
-        date = booking_info[0][1]
-        time = booking_info[0][2]
+        input_range = request.form.get("range")
+        court = request.form.get("court")
+        current_time_str = getCurrTime()
 
-        title = "Booking Deleted"
-        msg = f"<p>Your booking for court {court} on {date} at {time} was deleted by an admin</p>"
-        recipient = getUserEmail(id)
+        return_data = getAllBookingsCount(input_range, court, current_time_str)
+        isRangeValid = return_data[0]
+        total_count = return_data[1]
+
+        if not isRangeValid:
+            flash("Invalid range input")
+            return redirect("/admin")
+        
+        return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, court=court, total_count=total_count, input_range=input_range)
+
+    # page load with GET
+    return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all)
+
+@app.route("/api/bookalday", methods=["POST"])
+@login_required
+@admin_required
+def book_all_day():
+    form_court_date = CourtDateForm()
+    user_id = session["user_id"] # store current user's id
+
+    # admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
+    if "book_day" in request.form and form_court_date.validate_on_submit() and validateDate(form_court_date.date): 
+        court = form_court_date.court.data # pass this into query
+        selected_date = form_court_date.date.data
+        selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
+        selected_weekday = selected_date.strftime("%a") # pass this into query
+        people = 4 # default when admin makes a booking
+
+        if isDatePast(selected_date_str):
+            return redirect("/admin")
+
+        # Delete existing bookings and book for all possible day times
+        deleteAllDayBookings(selected_date_str, court)
+        bookAllDay(selected_weekday, possibletimesweekend, user_id, selected_date_str, court, people, possibletimes)
+
+        title = "Day Booked"
+        msg = f"<p>All times for {court} on {selected_date_str} are now booked</p>"
+        recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
-        admin_title = "Booking Deleted"
-        admin_msg = "<p>One booking was deleted</p>"
-        admin_email = getUserEmail(user_id)
-        sendEmail(admin_title, admin_msg, admin_email)
+        return redirect("/admin")
 
-        # get type - if type is admin, redirect to admin, if not, redirect to homepage
-        type = getUserType(user_id)
-        if type == "admin":
-            return redirect("/admin")
-        else:
-            return redirect("/mybookings")
 
+@app.route("/api/createindex", methods=["POST"])
+@login_required
+def create_index():
     if "create_index" in request.form and request.method == "POST":
         name = request.form.get("name")
         table = request.form.get("table")
@@ -357,68 +440,19 @@ def admin():
         createIndex(columns, name, table)
 
         return redirect("/admin")
-    
-    # admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
-    if "book_day" in request.form and form_court_date.validate_on_submit() and validateDate(form_court_date.date): 
-        court = form_court_date.court.data # pass this into query
-        selected_date = form_court_date.date.data
-        selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
-        selected_weekday = selected_date.strftime("%a") # pass this into query
-        people = 4 # default when admin makes a booking
-
-        if isDatePast(selected_date_str):
-            return redirect("/admin")
-
-        # Delete existing bookings and book for all possible day times
-        deleteBookings(None, None, selected_date_str, court)
-        bookAllDay(selected_weekday, possibletimesweekend, user_id, selected_date_str, court, people, possibletimes)
-
-        title = "Day Booked"
-        msg = f"<p>All times for {court} on {selected_date_str} are now booked</p>"
-        recipient = getUserEmail(user_id)
-        sendEmail(title, msg, recipient)
-
-        return redirect("/admin")
-
-    # count the number of bookings in a selected day
-    if "count_day_bookings" in request.form and form_court_date.validate_on_submit():
-        court = form_court_date.court.data # pass this into query
-        selected_date = form_court_date.date.data
-        selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
-
-        day_count = getDayBookingsCount(court, selected_date_str)
-
-        if court == "All courts":
-            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str)
-        else:
-            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str, court=court)
 
 
-    if "count_all_bookings" and request.method == "POST":
-        
-        input_range = request.form.get("range")
-        court = request.form.get("court")
-        current_time_str = getCurrTime()
-
-        return_data = getAllBookingsCount(input_range, court, current_time_str)
-        isRangeValid = return_data[0]
-        total_count = return_data[1]
-
-        if not isRangeValid:
-            flash("Invalid range input")
-            return redirect("/admin")
-        
-        return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, court=court, total_count=total_count, input_range=input_range)
-
-    # page load with GET
-    return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all)
-
-
-@app.route("/makeadmin", methods=["GET", "POST"])
+@app.route("/createadmin", methods=["GET"])
 @login_required
-def makeadmin():
+def createadmin():
+    return render_template("createadmin.html")
 
-    if "make_admin" in request.form and request.method == "POST":
+@app.route("/api/createadmin", methods=["POST"])
+@login_required
+def create_admin():
+    user_id = session["user_id"]
+
+    if "create_admin" in request.form and request.method == "POST":
         secret_password = request.form.get("secretpassword")
         # if the secret password is correct, proceed to create new admin account
         if secret_password == ADMIN_SECRET_PASSWORD:
@@ -430,7 +464,7 @@ def makeadmin():
             usernames = getAllUsernames()
 
             if not validateEmail(email) or not validateRegistration(usernames, admin_username, admin_password, confirmation, email):
-                return redirect("/makeadmin")
+                return redirect("/createadmin")
             else:
                 isAdmin = True
                 createAccount(admin_password, admin_username, email, isAdmin)
@@ -441,57 +475,66 @@ def makeadmin():
                 # Email user who created new admin
                 second_title = "Admin Created"
                 second_msg = f"<p>Admin {admin_username} created</p>"
-                user_email = getUserEmail(id)
+                user_email = getUserEmail(user_id)
                 sendEmail(second_title, second_msg, user_email)
+                return redirect("/createadmin")
         else:
             flash("Invalid secret password", "danger")
             return redirect("/")
 
-    return render_template("makeadmin.html")
 
-
-@app.route("/account", methods=["GET", "POST"])
+@app.route("/account", methods=["GET"])
 @login_required
 def account():
+    return render_template("account.html")
+
+@app.route("/api/changepassword", methods=["POST"])
+@login_required
+def change_password():
     user_id = session["user_id"]
 
-    if request.method == "POST":
-        # Store variables common to all form submits
+    if "changepassword" in request.form and request.method == "POST":
+        password = request.form.get("password")
+        username = getUsername(user_id)
+        recipient = getUserEmail(user_id) 
+        newpassword = request.form.get("newpassword")
+        confirmation = request.form.get("confirmation")
+
+        if newpassword.split() == "" or confirmation.split() == "":
+            flash("New password cannot be null", "danger")
+            return redirect("/account")
+        elif newpassword != confirmation:
+            flash("New password and confirmation don't match", "danger")
+            return redirect("/account")
+        else: # check if password hash matches current hash, if it does, change user's password
+            if passwordEqualsHash(user_id, password):
+                updateUserPassword(newpassword, user_id)
+                flash("Password successfuly updated", "success")
+                title = f"{appname} - Password modified"
+                msg = f"<p>The password for {username} was modified</p>"
+                sendEmail(title, msg, recipient)
+            return redirect("/account")
+
+@app.route("/api/deleteaccount", methods=["POST"])
+@login_required
+def delete_account():
+    user_id = session["user_id"]
+
+    if "deleteaccount" in request.form and request.method == "POST":
         password = request.form.get("password")
         username = getUsername(user_id)
         recipient = getUserEmail(user_id)
+        if deleteUserAccount(user_id, password):
+            # Email new admin
+            title = f"Goodbye from {appname}"
+            msg = f"<p>Your account {username} was deleted</p>"
+            sendEmail(title, msg, recipient)
 
-        if "changepassword" in request.form:
-            newpassword = request.form.get("newpassword")
-            confirmation = request.form.get("confirmation")
+            session.clear()
 
-            if newpassword.split() == "" or confirmation.split() == "":
-                flash("New password cannot be null", "danger")
-                return redirect("/account")
-            elif newpassword != confirmation:
-                flash("New password and confirmation don't match", "danger")
-                return redirect("/account")
-            else: # check if password hash matches current hash, if it does, change user's password
-                if passwordEqualsHash(user_id, password):
-                    updateUserPassword(newpassword, user_id)
-                    flash("Password successfuly updated", "success")
-                    title = f"{appname} - Password modified"
-                    msg = f"<p>The password for {username} was modified</p>"
-                    sendEmail(title, msg, recipient)
-                return redirect("/account")
-
-        if "deleteaccount" in request.form:
-            if deleteUserAccount(user_id, password):
-                # Email new admin
-                title = f"Goodbye from {appname}"
-                msg = f"<p>Your account {username} was deleted</p>"
-                sendEmail(title, msg, recipient)
-
-                session.clear()
-
-                return redirect("/login")
-
-    return render_template("account.html")
+            return redirect("/login")
+        else:
+            return redirect("/account")
 
 
 
@@ -502,8 +545,6 @@ if __name__ == '__main__':
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Monday
-    # move email functionality to its own file
 # PostgreSQL - Tuesday/Wednesday
     # have app be on PostgreSQL and change dates to be of DATE type and update schema for PostgreSQL
     # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime + pytz
@@ -521,7 +562,6 @@ if __name__ == '__main__':
     # basic styling (with SASS and JS where necessary + Bootstrap)
     # have a detailed Readme
 # Deployment - Friday
-    # clear database and create indexes where necessary
     # deploy and show to Luis
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

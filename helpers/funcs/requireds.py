@@ -22,3 +22,12 @@ def admin_required(f):
             return redirect("/")
         return f(*args, **kwargs)
     return decorated_function
+
+def not_logged_in(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id"):
+            flash("Log out to access this page", "danger")
+            return redirect("/")
+        return f(*args, **kwargs)
+    return decorated_function

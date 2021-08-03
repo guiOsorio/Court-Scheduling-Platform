@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <form action="/makeadmin" method="POST">
+    <form action="/api/createadmin" method="POST">
         <label for="secretpassword">Secret password</label>
         <input type="password" name="secretpassword" id="secretpassword">
 
@@ -17,6 +17,6 @@
         <label for="confirmation">Confirmation</label>
         <input type="password" name="confirmation" id="confirmation">
 
-        <input type="submit" id="make_admin" name="make_admin" value="Make admin">
+        <input type="submit" id="create_admin" name="create_admin" value="Create admin">
     </form>
 {% endblock %}

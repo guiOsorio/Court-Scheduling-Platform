@@ -36,16 +36,16 @@
                 <li>People playing - {{ b[5] }}</li>
             </ul>
 
-            <form action="/admin" method="POST">
+            <form action="/api/deletebooking" method="POST">
                 <input type="hidden" name="id" value="{{ b[6] }}">
-                <input type="submit" id="delete_booking" name="delete_booking" value="Delete booking">
+                <input type="submit" id="admin_delete_booking" name="admin_delete_booking" value="Delete booking">
             </form>
         {% endfor %}
     {% endif %}
 
     <h3>Create index</h3>
     
-    <form action="/admin" method="POST">
+    <form action="/api/createindex" method="POST">
         <label for="name">Index name</label>
         <input type="text" name="name" id="name">
 
@@ -60,7 +60,7 @@
 
     <h3>Book day</h3>
 
-    <form action="/admin" method="POST">
+    <form action="/api/bookalday" method="POST">
         {{ form_court_date.csrf_token }}
 
         {{ form_court_date.court.label }}
