@@ -6,6 +6,7 @@ from flask import flash
 from datetime import datetime
 from werkzeug.security import check_password_hash # (hash, password) checks if password matches the hash
 from helpers.variables.others import POSTGRE_URI
+from helpers.funcs.actions.gets import getPrevTime, getNextTime
 
 
 def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
@@ -42,11 +43,23 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
     cur.execute("""SELECT type FROM users WHERE id = %(user_id)s""", {"user_id": user_id})
     user_type = cur.fetchone()[0]
 
+    # Get previous possible booking time as prevtime and next possible booking time as nexttime
+    prevtime = getPrevTime(time)
+    nexttime = getNextTime(time)
 
     # Check if that time is already booked
     cur.execute("""SELECT * FROM bookings
-                WHERE date = %(date)s AND time = %(time)s AND court = %(court)s""", {"date": selected_date, "time": time, "court": court})
-    is_booked = cur.fetchone()
+                WHERE date = %(date)s AND time = %(prevtime)s AND court = %(court)s""",
+                {"date": selected_date, "prevtime": prevtime, "court": court})
+    is_prevtime_booked = cur.fetchone()
+    cur.execute("""SELECT * FROM bookings
+                WHERE date = %(date)s AND time = %(time)s AND court = %(court)s""",
+                {"date": selected_date, "time": time, "court": court})
+    is_exacttime_booked = cur.fetchone()
+    cur.execute("""SELECT * FROM bookings
+                WHERE date = %(date)s AND time = %(nexttime)s AND court = %(court)s""",
+                {"date": selected_date, "nexttime": nexttime, "court": court})
+    is_nexttime_booked = cur.fetchone()
 
     # Own validation
     if people not in numofpeople:
@@ -64,8 +77,15 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
     elif selected_day_bookings >= 2 and user_type != "admin":
         flash("A maximum of 2 bookings per person per day is allowed", "danger")
         return False
-    elif is_booked:
+    elif is_prevtime_booked:
+        flash("This court is already booked for this time (a booking is already in place for 30 minutes before your selected booking time)", "danger")
+        return False
+    # if the booking hour is already booked or if previous possible booking time or next possible booking time is booked, don't allow booking (bookings are for 1 hour)
+    elif is_exacttime_booked:
         flash("This court is already booked at this time. Please select a different court or time", "danger")
+        return False
+    elif is_nexttime_booked:
+        flash("This court is already booked for this time (a booking is already in place for 30 minutes after your selected booking time)", "danger")
         return False
     elif selected_year == current_year and selected_month == current_month and selected_day == current_day and selected_hour <= current_hour + 1:
         if selected_hour == current_hour + 1 and (60 + selected_minute - current_minute) <= 30:

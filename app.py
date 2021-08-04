@@ -61,7 +61,7 @@ class BookingForm(FlaskForm):
     people = SelectField('Number of people', choices=numofpeople)
     court = SelectField('Court', choices=courts)
     date = DateField('Date', format='%Y-%m-%d', default=datetime.now())
-    time = SelectField('Time (open from 09:00 to 22:00)', choices=possibletimes, default="Choose a time")
+    time = SelectField('Time', choices=possibletimes, default="Choose a time")
 
 # Check bookings form
 class CheckBookingsForm(FlaskForm):
@@ -557,16 +557,12 @@ if __name__ == '__main__':
 
 # PostgreSQL - Tuesday/Wednesday
     # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime + pytz
-    # specify Portuguese time zone for time
-    # change date lists to be of date type, not string
-    # change bookings to be of 1 hour instead of 30 minutes, while still allowing appointments to start at hour:00 and hour:30 (don't forget to update booking validation)
-    # make sure updates to the rest of the code are made and work
-    # improve email messages
+    # improve email messages (include appname variable on titles)
 # Scheduler - AWS Lambda - Thursday
     # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email
 # React - Thursday
-            # connect to React
+    # connect to React
 # Pre-Deployment - Friday
     # session not ending properly when I restart flask
     # test entire app

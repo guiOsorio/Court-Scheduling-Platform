@@ -1,4 +1,5 @@
-import psycopg2 
+import psycopg2
+import datetime as dt
 
 from datetime import datetime
 from helpers.variables.others import POSTGRE_URI
@@ -213,3 +214,61 @@ def getUsername(user_id):
     username = cur.fetchone()[0]
 
     return username
+
+
+# Function to return a list of strings to represent the time options for a certain club
+def getRegPossibleTimes(opening, close):
+    possibletimes = ["Choose a time"]
+
+    for i in range(opening, close):
+        if i < 10:
+            t = dt.time(i, 0)
+            possibletimes.append("0{}:{}0".format(t.hour, t.minute))
+            if i != close - 1: # for the last hour, only have a booking starting at :00, none at :30
+                t2 = dt.time(i, 30)
+                possibletimes.append("0{}:{}".format(t2.hour, t2.minute))
+        else:
+            t = dt.time(i, 0)
+            possibletimes.append("{}:{}0".format(t.hour, t.minute))
+            if i != close - 1: # for the last hour, only have a booking starting at :00, none at :30
+                t2 = dt.time(i, 30)
+                possibletimes.append("{}:{}".format(t2.hour, t2.minute))
+    return possibletimes
+
+# Function which returns a list of all the courts from a club, all options set to true adds "All courts" entry to the list
+def getRegCourts(numofcourts, all = False):
+    courts = []
+    for i in range(1, numofcourts + 1):
+        courts.append(str(i))
+    if all:
+        courts.append("All courts")
+    return courts
+
+def getPrevTime(time):
+    if time[3:5] == "00":
+        # Get the previous hour
+        currhour = int(time[0:2])
+        prevhour = str(currhour - 1)
+        # Add a 0 to the start of the prevhour string to match the possibletimes array
+        if int(prevhour) < 10:
+            prevhour = "0" + prevhour
+        prevtime = prevhour + ":30"
+    elif time[3:5] == "30":
+        prevtime = time[0:3] + "00"
+    
+    return prevtime
+
+
+def getNextTime(time):
+    if time[3:5] == "00":
+        nexttime = time[0:3] + "30"
+    elif time[3:5] == "30":
+        # Get the next hour
+        currhour = int(time[0:2])
+        nexthour = str(currhour + 1)
+        # Add a 0 to the start of the nexthour string to match the possibletimes array
+        if int(nexthour) < 10:
+            nexthour = "0" + nexthour
+        nexttime = nexthour + ":00"
+    
+    return nexttime
