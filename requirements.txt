@@ -2,6 +2,6 @@ flask
 flask_wtf
 wtforms
 datetime
-sqlite3
+psycopg2
 os
 flask_mail

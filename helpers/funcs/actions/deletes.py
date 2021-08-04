@@ -1,17 +1,17 @@
-import sqlite3
+import psycopg2
 
 from flask import flash
 from helpers.funcs.actions.gets import getCurrDate
 from werkzeug.security import check_password_hash
-
+from helpers.variables.others import POSTGRE_URI
 
 def deleteBooking(booking_id):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     # Delete booking
-    cur.execute("DELETE FROM bookings WHERE booking_id = :booking_id", {"booking_id": booking_id})
+    cur.execute("DELETE FROM bookings WHERE booking_id = %(booking_id)s", {"booking_id": booking_id})
     con.commit()
     flash("Booking succesfully deleted", "success")
     con.close()
@@ -20,10 +20,10 @@ def deleteBooking(booking_id):
 
 def deleteUserDayBookings(user_id, selected_date):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("DELETE FROM bookings WHERE user_id = :user_id AND date = :selected_date",
+    cur.execute("DELETE FROM bookings WHERE user_id = %(user_id)s AND date = %(selected_date)s",
                 {"user_id": user_id, "selected_date": selected_date})
     con.commit()
     flash(f"No more bookings for {selected_date}", "success")
@@ -33,11 +33,11 @@ def deleteUserDayBookings(user_id, selected_date):
 
 def deleteAllUserBookings(user_id):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     # Delete all bookings
-    cur.execute("DELETE FROM bookings WHERE user_id = :user_id", {"user_id": user_id})
+    cur.execute("DELETE FROM bookings WHERE user_id = %(user_id)s", {"user_id": user_id})
     con.commit()
     flash("No more bookings for you", "success")
     con.close()
@@ -46,16 +46,16 @@ def deleteAllUserBookings(user_id):
 
 def deleteAllDayBookings(selected_date, court):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     if court == "All courts":
         # Delete every booking for the selected_date
-        cur.execute("DELETE FROM bookings WHERE date = :date", {"date": selected_date})
+        cur.execute("DELETE FROM bookings WHERE date = %(date)s", {"date": selected_date})
         con.commit()
     else:
         # delete every booking for the selected_date and court
-        cur.execute("DELETE FROM bookings WHERE date = :date AND court = :court", {"date": selected_date, "court": court})
+        cur.execute("DELETE FROM bookings WHERE date = %(date)s AND court = %(court)s", {"date": selected_date, "court": court})
         con.commit()
     con.close()
 
@@ -64,7 +64,7 @@ def deleteAllDayBookings(selected_date, court):
 
 def deleteUserAccount(user_id, password):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     # Ensure password was submitted
@@ -73,18 +73,18 @@ def deleteUserAccount(user_id, password):
         return False
 
     # Check if password is valid
-    cur.execute("SELECT hash FROM users WHERE id = :user_id", {"user_id": user_id})
+    cur.execute("SELECT hash FROM users WHERE id = %(user_id)s", {"user_id": user_id})
     hash = cur.fetchone()[0]
     if not check_password_hash(hash, password):
         flash("Invalid password", "danger")
         return False
     
     # Delete all bookings for the account
-    cur.execute("DELETE FROM bookings WHERE user_id = :user_id", {"user_id": user_id})
+    cur.execute("DELETE FROM bookings WHERE user_id = %(user_id)s", {"user_id": user_id})
     con.commit()
 
     # Delete account
-    cur.execute("DELETE FROM users WHERE id = :user_id", {"user_id": user_id})
+    cur.execute("DELETE FROM users WHERE id = %(user_id)s", {"user_id": user_id})
     con.commit()
 
     con.close()

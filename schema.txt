@@ -1,27 +1,27 @@
 USERS TABLE:
-        CREATE TABLE "users" (
-            "id"    INTEGER,
-            "username"      TEXT NOT NULL,
-            "hash"  TEXT NOT NULL,
-            "email"  TEXT NOT NULL,
-            "type" TEXT DEFAULT "user", 
-            PRIMARY KEY("id")        
-		);
+        CREATE TABLE users (
+                            id INTEGER,
+                            username VARCHAR(50) NOT NULL,
+                            hash VARCHAR(255) NOT NULL,
+                            email VARCHAR(50) NOT NULL,
+                            type VARCHAR(20) DEFAULT 'user', 
+                            PRIMARY KEY(id)        
+                        );
 
 
 BOOKINGS TABLE:
-        CREATE TABLE "bookings" (
-            "booking_id"  INTEGER,
-            "user_id"  INTEGER,
-            "week_day" TEXT NOT NULL,
-            "date"  TEXT NOT NULL,
-            "time"  TEXT NOT NULL,
-            "court" INTEGER NOT NULL,
-            "people" INTEGER NOT NULL,
-            "made_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY("booking_id"),
-            FOREIGN KEY("user_id") REFERENCES users("id")
-        );
+        CREATE TABLE bookings (
+                            booking_id INTEGER,
+                            user_id INTEGER,
+                            week_day VARCHAR(10) NOT NULL,
+                            date DATE NOT NULL,
+                            time VARCHAR(10) NOT NULL,
+                            court INTEGER NOT NULL,
+                            people INTEGER NOT NULL,
+                            made_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            PRIMARY KEY(booking_id),
+                            FOREIGN KEY(user_id) REFERENCES users(id)
+                        );
 
 
 

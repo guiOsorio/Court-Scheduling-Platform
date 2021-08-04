@@ -5,6 +5,7 @@ __pycache__
 */*/*.map
 
 ideas.txt
+schema.txt
 
 .env
 

@@ -1,4 +1,5 @@
 import os
+import psycopg2
 
 from flask import Flask, flash, redirect, render_template, session, request
 from flask_session import Session
@@ -8,7 +9,7 @@ from wtforms import SelectField
 from datetime import datetime
 from flask_mail import Mail, Message
 # Own helper funcs
-from helpers.funcs.actions.creates import createIndex, createBooking, createUser, createAccount, bookAllDay
+from helpers.funcs.actions.creates import createSchema, createIndex, createBooking, createUser, createAccount, bookAllDay
 from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, deleteAllUserBookings, deleteAllDayBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
     getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername
@@ -18,12 +19,21 @@ from helpers.funcs.validations import validateBooking, validateLogin, validateEm
 from helpers.funcs.requireds import login_required, admin_required, not_logged_in
 # Own helper lists
 from helpers.variables.lists import numofpeople, courts, courts_all, possibletimes, possibletimesweekend
+# Dotenv
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize app
 app = Flask(__name__)
 
 # Configure for flask_wtf
 app.config["SECRET_KEY"] = "secret"
+
+# If schema already exists, move on with the program
+try:
+    createSchema()
+except psycopg2.errors.DuplicateTable:
+    pass
 
 # Get environment variables
 ADMIN_SECRET_PASSWORD = os.environ.get('ADMIN_SECRET_PASSWORD')
@@ -546,22 +556,23 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # PostgreSQL - Tuesday/Wednesday
-    # have app be on PostgreSQL and change dates to be of DATE type and update schema for PostgreSQL
     # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime + pytz
     # specify Portuguese time zone for time
     # change date lists to be of date type, not string
     # change bookings to be of 1 hour instead of 30 minutes, while still allowing appointments to start at hour:00 and hour:30 (don't forget to update booking validation)
     # make sure updates to the rest of the code are made and work
     # improve email messages
-# Scheduler - AWS Lambda - Wednesday
+# Scheduler - AWS Lambda - Thursday
     # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email
-# Pre-Deployment - Thursday
+# React - Thursday
+            # connect to React
+# Pre-Deployment - Friday
     # session not ending properly when I restart flask
     # test entire app
     # basic styling (with SASS and JS where necessary + Bootstrap)
     # have a detailed Readme
-# Deployment - Friday
+# Deployment - Saturday
     # deploy and show to Luis
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

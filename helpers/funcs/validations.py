@@ -1,10 +1,11 @@
-import sqlite3
+import psycopg2
 import re # regex
 import datetime as dt
 
 from flask import flash
 from datetime import datetime
 from werkzeug.security import check_password_hash # (hash, password) checks if password matches the hash
+from helpers.variables.others import POSTGRE_URI
 
 
 def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
@@ -31,17 +32,20 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
     current_day = datetime.now().day # int
 
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     # Check number of bookings and if user is an admin
-    cur.execute("""SELECT COUNT(*), type FROM bookings JOIN users ON user_id = id
-                WHERE user_id = :user_id AND date = :date""", {"user_id": user_id, "date": selected_date})
-    selected_day_bookings = cur.fetchone()
+    cur.execute("""SELECT COUNT(*) FROM bookings JOIN users ON user_id = id
+                WHERE user_id = %(user_id)s AND date = %(date)s""", {"user_id": user_id, "date": selected_date})
+    selected_day_bookings = cur.fetchone()[0]
+    cur.execute("""SELECT type FROM users WHERE id = %(user_id)s""", {"user_id": user_id})
+    user_type = cur.fetchone()[0]
+
 
     # Check if that time is already booked
     cur.execute("""SELECT * FROM bookings
-                WHERE date = :date AND time = :time AND court = :court""", {"date": selected_date, "time": time, "court": court})
+                WHERE date = %(date)s AND time = %(time)s AND court = %(court)s""", {"date": selected_date, "time": time, "court": court})
     is_booked = cur.fetchone()
 
     # Own validation
@@ -57,7 +61,7 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
     elif selected_year < current_year or (selected_year == current_year and (selected_month < current_month) or (selected_month == current_month and selected_day < current_day)):
         flash("Please provide a valid date", "danger")
         return False
-    elif selected_day_bookings[0] >= 2 and selected_day_bookings[1] != "admin":
+    elif selected_day_bookings >= 2 and user_type != "admin":
         flash("A maximum of 2 bookings per person per day is allowed", "danger")
         return False
     elif is_booked:
@@ -97,10 +101,10 @@ def validateLogin(username, password):
         return False
 
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT * FROM users WHERE username = :username", {"username": username})
+    cur.execute("SELECT * FROM users WHERE username = %(username)s", {"username": username})
     user = cur.fetchone()
 
     if not user:
@@ -121,11 +125,11 @@ regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 # Function for validating an email
 def validateEmail(email):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     # check if email already exists
-    cur.execute("SELECT * FROM users WHERE email = :email", {"email": email})
+    cur.execute("SELECT * FROM users WHERE email = %(email)s", {"email": email})
     query_email = cur.fetchone()
 
     if query_email:
@@ -167,7 +171,7 @@ def validateIndex(name, table, columns_input, columns):
     # CREATE INDEX VALIDATION
 
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     if name == "" or table.strip() == "" or columns_input.strip() == "":
@@ -175,7 +179,7 @@ def validateIndex(name, table, columns_input, columns):
         return False
 
     # if table doesn't exist - table needs to exist and have at least one row to have an index created
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")                                ##################### FIGURE THIS OUT
     tables_in_db = cur.fetchall()
 
     # check if table exists
@@ -193,7 +197,7 @@ def validateIndex(name, table, columns_input, columns):
     
     # if any of the columns do not belong to the table - for loop for every column field
     for column in columns:
-        cur.execute("SELECT 1 FROM PRAGMA_TABLE_INFO(:table) WHERE name = :column", {"table": table, "column": column})
+        cur.execute("SELECT 1 FROM PRAGMA_TABLE_INFO(:table) WHERE name = :column", {"table": table, "column": column})             ##################### FIGURE THIS OUT
         if cur.fetchone() is None:
             flash("Column does not exist", "danger")
             return False

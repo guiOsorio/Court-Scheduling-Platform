@@ -1,8 +1,9 @@
-import sqlite3
+import psycopg2
 
 from helpers.funcs.actions.gets import getCurrDate
 from flask import flash
 from werkzeug.security import check_password_hash
+from helpers.variables.others import POSTGRE_URI
 
 
 def isDatePast(selected_date_str):
@@ -17,11 +18,11 @@ def isDatePast(selected_date_str):
 
 def passwordEqualsHash(user_id, password):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     # Find user's hash
-    cur.execute("SELECT hash FROM users WHERE id = :user_id", {"user_id": user_id})
+    cur.execute("SELECT hash FROM users WHERE id = %(user_id)s", {"user_id": user_id})
     hash = cur.fetchone()[0]
 
     if not check_password_hash(hash, password):
@@ -35,7 +36,7 @@ def passwordEqualsHash(user_id, password):
 
 def doesBookingIdExist(booking_id):
     # Connect to database
-    con = sqlite3.connect("scheduling.db")
+    con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
     booking_id = int(booking_id)
