@@ -13,9 +13,9 @@ from helpers.funcs.actions.creates import createSchema, createIndex, createBooki
 from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, deleteAllUserBookings, deleteAllDayBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
     getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername
-from helpers.funcs.actions.updates import updateUserPassword
+from helpers.funcs.actions.updates import updateUserPassword, updateUserEmail
 from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
-from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate
+from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate, validatePassword
 from helpers.funcs.requireds import login_required, admin_required, not_logged_in
 # Own helper lists
 from helpers.variables.lists import numofpeople, courts, courts_all, possibletimes, possibletimesweekend
@@ -508,7 +508,14 @@ def create_admin():
 @app.route("/account", methods=["GET"])
 @login_required
 def account():
-    return render_template("account.html")
+    user_id = session["user_id"]
+
+    username = getUsername(user_id)
+    email_address = getUserEmail(user_id)
+    type = getUserType(user_id)
+    userInfo = {"uname": username, "eaddress": email_address, "type": type}
+
+    return render_template("account.html", userInfo=userInfo)
 
 @app.route("/api/changepassword", methods=["POST"])
 @login_required
@@ -536,6 +543,38 @@ def change_password():
                 msg = f"<p>The password for {username} was modified.</p>"
                 sendEmail(title, msg, recipient)
             return redirect("/account")
+
+@app.route("/api/changeemail", methods=["POST"])
+@login_required
+def change_email():
+    user_id = session["user_id"]
+
+    if "changeemail" in request.form and request.method == "POST":
+        password = request.form.get("password")
+        newemail = request.form.get("newemail")
+        username = getUsername(user_id)
+        recipient = getUserEmail(user_id)
+
+        # Check if password is correct
+        if not validatePassword(password, user_id) or not validateEmail(newemail):
+            return redirect("/account")
+        updateUserEmail(newemail, user_id)
+        flash("Email successfuly updated", "success")
+
+        # Send email to original email account
+        title = f"{appname} - Email modified"
+        msg = f"""<p>The email for {username} was modified.</p>
+                   <p>Your new email is {newemail}.</p>"""
+        sendEmail(title, msg, recipient)
+
+        # Send email to new email account
+        title_newemail = f"{appname} - Email modified"
+        msg_newemail = f"""<p>This email is now the email address for the account {username}.</p>"""
+        sendEmail(title_newemail, msg_newemail, newemail)
+
+        return redirect("/account")
+        
+
 
 @app.route("/api/deleteaccount", methods=["POST"])
 @login_required
@@ -568,7 +607,6 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Account page
-    # show all useful account info (username, email, account type)
     # have option to change email
     # have user be able to change password by email
 # disable unavailable booking hours when user is booking a court

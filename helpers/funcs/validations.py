@@ -201,6 +201,7 @@ def validateIndex(name, table, columns_input, columns):
     # if table doesn't exist - table needs to exist and have at least one row to have an index created
     cur.execute("SELECT name FROM sqlite_master WHERE type='table'")                                ##################### FIGURE THIS OUT
     tables_in_db = cur.fetchall()
+    con.close()
 
     # check if table exists
     num_of_tables = len(tables_in_db)
@@ -231,3 +232,20 @@ def validateDate(field):
         return False
     else:
         return True
+
+
+def validatePassword(password, user_id):
+    # Connect to database
+    con = psycopg2.connect(POSTGRE_URI)
+    cur = con.cursor()
+
+    cur.execute("SELECT hash FROM users WHERE id = %(user_id)s", {"user_id": user_id})
+    hash = cur.fetchone()[0]
+
+    con.close()
+
+    if not check_password_hash(hash, password):
+        flash("Invalid password", "danger")
+        return False
+    
+    return True
