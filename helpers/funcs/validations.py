@@ -199,7 +199,9 @@ def validateIndex(name, table, columns_input, columns):
         return False
 
     # if table doesn't exist - table needs to exist and have at least one row to have an index created
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")                                ##################### FIGURE THIS OUT
+    # get name of all tables in the schema
+    cur.execute("""SELECT table_name FROM information_schema.tables                         
+                    WHERE table_schema='public' AND table_type='BASE TABLE';""")                                ##################### TEST THIS
     tables_in_db = cur.fetchall()
     con.close()
 
@@ -216,10 +218,16 @@ def validateIndex(name, table, columns_input, columns):
         else:
             z += 1
     
+    # Variable to store the name of all column names in the schema in a list (schema_columns_list)
+    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = 'public';")             #################### TEST THIS
+    schema_columns = cur.fetchall()
+    schema_columns_list = []
+    for column in schema_columns:
+        schema_columns_list.append(column[0])
     # if any of the columns do not belong to the table - for loop for every column field
     for column in columns:
-        cur.execute("SELECT 1 FROM PRAGMA_TABLE_INFO(:table) WHERE name = :column", {"table": table, "column": column})             ##################### FIGURE THIS OUT
-        if cur.fetchone() is None:
+        # check if all inputted columns belong to a table in the schema
+        if column not in schema_columns_list:
             flash("Column does not exist", "danger")
             return False
 

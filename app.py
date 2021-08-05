@@ -598,16 +598,33 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # figure out index on validations.py validateIndex()
-# disable unavailable booking hours when user is booking a court
-# Scheduler - AWS Lambda - Thursday
+# create indexes on schema
+# Scheduler - AWS Lambda
     # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email
-# Pre-Deployment - Friday
+# Pre-Deployment
     # session not ending properly when I restart flask
     # test entire app
     # styling (with SASS and JS where necessary + Bootstrap)
+        # choose a nice color schema
+        # choose a nice font
+        # (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
+        # navbar is transparent (same color as page's background)
+        # homepage (index.html)
+            # have 2 nice Dan photos or from Unsplash on right half of screen and big title located a bit below images on the left side of the screen, 
+            #   as well as a smaller subtitle under the title
+            # images on right side of screen grow bigger on hover and go on top of each other like on the ACM website
+            # leave some space after main section for user to see the page continues
+            # have another section with a rectangle with text on the center of it
+        # login (login.html)
+            # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
+            # have login form be on the center of the page and with a different background
+        # add footer to the layout
+        # JS
+            # disable unavailable booking hours when user is booking a court
+            # show current date and time (hours and minutes) to update every minute on top of book a court page
     # have a detailed Readme
-# Deployment - Saturday
+# Deployment
     # deploy and show to Luis
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
