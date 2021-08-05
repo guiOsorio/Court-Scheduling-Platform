@@ -4,6 +4,7 @@ from helpers.funcs.actions.gets import getCurrDate
 from flask import flash
 from werkzeug.security import check_password_hash
 from helpers.variables.others import POSTGRE_URI
+from datetime import datetime
 
 
 def isDatePast(selected_date_str):
@@ -55,3 +56,11 @@ def doesBookingIdExist(booking_id):
         return False
     else:
         return True
+
+
+def showDateToUserFormat(date_str):
+    date_date = datetime.strptime(date_str, "%Y-%m-%d")
+    date_show_user = date_date.strftime("%B %d %Y")
+
+    return date_show_user
+    

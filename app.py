@@ -14,7 +14,7 @@ from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, 
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
     getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername
 from helpers.funcs.actions.updates import updateUserPassword
-from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist
+from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate
 from helpers.funcs.requireds import login_required, admin_required, not_logged_in
 # Own helper lists
@@ -54,6 +54,7 @@ mail = Mail(app)
 
 # Store program's name
 appname = "Scheduling"
+link_to_site = f'<p>Visit us at <a href="www.google.com">{appname}.com</a></p>'                ############ HERE (update link to show correct website)
 
 # FLASK-WTF FORMS
 # Booking form
@@ -75,7 +76,7 @@ class CourtDateForm(FlaskForm):
 # Function to send an email
 def sendEmail(title, text, recipient):
     msg = Message(title, recipients=[recipient])
-    msg.html = text
+    msg.html = text + link_to_site
     mail.send(msg)
     return
 
@@ -110,13 +111,13 @@ def makebooking():
             booking_id = getBookingId(court, selected_date, time)
             booking_info = getBookingInfo(booking_id)
 
-            title = "Booking created"
-            text = f"<p>A booking for court {court} at {time} on {selected_date} was created for you</p>"
+            selected_date_showuser = showDateToUserFormat(selected_date)
+            title = f"{appname} - Booking created"
+            text = f"<p>A booking for court {court} at {time} on {selected_date_showuser} was created for you.</p>"
             recipient = getUserEmail(user_id)
             sendEmail(title, text, recipient)
 
             return redirect("/makebooking")
-
 
     return render_template("makebooking.html", form=form)
 
@@ -177,8 +178,9 @@ def create_account():
             session["user_id"] = id
 
             # get email and send registration confirmation
-            title = "Welcome to Scheduling"
-            msg = "<p>Your account was successfully created</p>"
+            title = f"Welcome to {appname}"
+            msg = f"""<h2>Your account was successfully created</h2>
+                       <p><strong>Username</strong>: {username}.</p>"""
             recipient = getUserEmail(id)
             sendEmail(title, msg, recipient)
             return redirect("/")
@@ -216,8 +218,9 @@ def mybookings():
         # Get data for all of the user's bookings in the selected day 
         bookings_data = getUserBookingsData(user_id, selected_date)
 
+        date_showuser = showDateToUserFormat(date)
         if not bookings_data:
-            msg = f"You have no bookings for {date}"
+            msg = f"You have no bookings for {date_showuser}"
             return render_template("mybookings.html", form=form, msg=msg)
         else:
             return render_template("mybookings.html", form=form, bd=bookings_data)
@@ -226,8 +229,7 @@ def mybookings():
     if "show_upcoming" in request.form and form.validate_on_submit():
         # Get user data for all of the user's upcoming bookings
         showAll = True
-        selected_date = None
-        bookings_data = getUserBookingsData(user_id, selected_date, showAll)
+        bookings_data = getUserBookingsData(user_id, None, showAll)
 
         if not bookings_data:
             msg = "You have no upcoming bookings"
@@ -254,10 +256,16 @@ def delete_booking():
         # Check if booking id is valid
         if not doesBookingIdExist(booking_id):
             return redirect("/mybookings")
+        
+        booking_info = getBookingInfo(booking_id)
+        deleteBooking(booking_id)
 
-        deleteBooking(booking_id)                                                                        
-        title = "Booking Deleted"
-        msg = "<p>One of your bookings was deleted</p>"
+        court = booking_info[0][0]
+        date = booking_info[0][1].strftime("%Y-%m-%d")
+        date_showuser = showDateToUserFormat(date)
+        time = booking_info[0][2]                                                                        
+        title = f"{appname} - Booking Deleted"
+        msg = f"<p>Your booking for court {court} on {date_showuser} at {time} was deleted.</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
@@ -273,18 +281,20 @@ def delete_booking():
         # Check if deletion is valid
         deleteBooking(booking_id)                                                           
         court = booking_info[0][0]
-        date = booking_info[0][1]
+        date = booking_info[0][1].strftime("%Y-%m-%d")
         time = booking_info[0][2]
         # get id of user who had made the booking
         id = getUserId(booking_id)
 
-        title = "Booking Deleted"
-        msg = f"<p>Your booking for court {court} on {date} at {time} was deleted by an admin</p>"
+        date_showuser = showDateToUserFormat(date)
+        title = f"{appname} - Booking Deleted"
+        msg = f"<p>Your booking for court {court} on {date_showuser} at {time} was deleted by an admin.</p>"
         recipient = getUserEmail(id)
         sendEmail(title, msg, recipient)
 
-        admin_title = "Booking Deleted"
-        admin_msg = "<p>You deleted a booking using your admin power</p>"
+        deletedBookingUsername = getUsername(id)
+        admin_title = f"{appname} - Booking Deleted"
+        admin_msg = f"<p>You deleted a booking made by {deletedBookingUsername} using your admin power.</p>"
         admin_email = getUserEmail(user_id)
         sendEmail(admin_title, admin_msg, admin_email)
 
@@ -304,10 +314,11 @@ def delete_day_bookings():
         if isDatePast(selected_date):
             return redirect("/mybookings")
         
-        deleteUserDayBookings(user_id, selected_date)                                  
+        deleteUserDayBookings(user_id, selected_date)
 
-        title = f"All {selected_date} Bookings Deleted"
-        msg = f"<p>All of your bookings for {selected_date} were deleted</p>"
+        selected_date_showuser = showDateToUserFormat(selected_date)
+        title = f"All {selected_date_showuser} Bookings Deleted"
+        msg = f"<p>All of your bookings for {selected_date_showuser} were deleted.</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
@@ -323,7 +334,7 @@ def delete_all_bookings():
         deleteAllUserBookings(user_id)
 
         title = "All Bookings Deleted"
-        msg = "<p>All of your bookings were deleted</p>"
+        msg = "<p>All of your bookings were deleted.</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
@@ -347,7 +358,6 @@ def admin():
         selected_date = date.strftime("%Y-%m-%d") # string
 
         bookings_data = getBookingsData(court, selected_date)
-
         if not bookings_data:
             if court == "All courts":
                 msg = "No bookings for the selected day"
@@ -363,13 +373,14 @@ def admin():
         court = form_court_date.court.data # pass this into query
         selected_date = form_court_date.date.data
         selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
+        selected_date_str_showuser = showDateToUserFormat(selected_date_str)
 
         day_count = getDayBookingsCount(court, selected_date_str)
 
         if court == "All courts":
-            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str)
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str_showuser)
         else:
-            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str, court=court)
+            return render_template("admin.html", form_court_date=form_court_date, courts_all=courts_all, day_count=day_count, selected_date_str=selected_date_str_showuser, court=court)
 
     # counts all the bookings for the selected court
     if "count_all_bookings" and request.method == "POST":
@@ -413,8 +424,9 @@ def book_all_day():
         deleteAllDayBookings(selected_date_str, court)
         bookAllDay(selected_weekday, possibletimesweekend, user_id, selected_date_str, court, people, possibletimes)
 
+        selected_date_str_showuser = showDateToUserFormat(selected_date_str)
         title = "Day Booked"
-        msg = f"<p>All times for {court} on {selected_date_str} are now booked</p>"
+        msg = f"<p>All times for {court} on {selected_date_str_showuser} are now booked.</p>"
         recipient = getUserEmail(user_id)
         sendEmail(title, msg, recipient)
 
@@ -480,11 +492,11 @@ def create_admin():
                 createAccount(admin_password, admin_username, email, isAdmin)
                 # Email new admin
                 title = "Admin Created"
-                msg = f"<p>Admin {admin_username} created</p>"
+                msg = f"<p>Admin {admin_username} created.</p>"
                 sendEmail(title, msg, email)
                 # Email user who created new admin
                 second_title = "Admin Created"
-                second_msg = f"<p>Admin {admin_username} created</p>"
+                second_msg = f"<p>Admin {admin_username} created.</p>"
                 user_email = getUserEmail(user_id)
                 sendEmail(second_title, second_msg, user_email)
                 return redirect("/createadmin")
@@ -521,7 +533,7 @@ def change_password():
                 updateUserPassword(newpassword, user_id)
                 flash("Password successfuly updated", "success")
                 title = f"{appname} - Password modified"
-                msg = f"<p>The password for {username} was modified</p>"
+                msg = f"<p>The password for {username} was modified.</p>"
                 sendEmail(title, msg, recipient)
             return redirect("/account")
 
@@ -537,7 +549,7 @@ def delete_account():
         if deleteUserAccount(user_id, password):
             # Email new admin
             title = f"Goodbye from {appname}"
-            msg = f"<p>Your account {username} was deleted</p>"
+            msg = f"<p>Your account {username} was deleted.</p>"
             sendEmail(title, msg, recipient)
 
             session.clear()
@@ -555,9 +567,11 @@ if __name__ == '__main__':
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# PostgreSQL - Tuesday/Wednesday
-    # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime + pytz
-    # improve email messages (include appname variable on titles)
+# Account page
+    # show all useful account info (username, email, account type)
+    # have option to change email
+    # have user be able to change password by email
+# disable unavailable booking hours when user is booking a court
 # Scheduler - AWS Lambda - Thursday
     # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email
