@@ -1,0 +1,109 @@
+# RESOURCES
+    Flask docs - https://flask.palletsprojects.com/en/2.0.x/
+    Flask-wtf docs - https://flask-wtf.readthedocs.io/en/0.15.x/
+    Flask-mail docs - https://pythonhosted.org/Flask-Mail/
+    datetime docs - https://docs.python.org/3/library/datetime.html
+    Datetime tutorial - https://www.youtube.com/watch?v=eirjjyP2qcQ
+    psycopg docs - https://www.psycopg.org/docs/
+    psql docs - https://www.postgresql.org/docs/13/app-psql.html
+    psql cheat sheet - https://gist.github.com/Kartones/dd3ff5ec5ea238d4c546
+    SASS docs - https://sass-lang.com/documentation
+    Bootstrap docs - https://getbootstrap.com/docs/4.1/getting-started/introduction/
+
+# START APP
+    to run the app run app.py file or 'flask run' from the main directory
+    to access database open the command prompt and execute "psql '<postgres url server>'"
+    to update SASS file run 'sass --watch static/sass/main.scss static/css/main.css' from the main directory
+
+# APP IDEAS
+    # version 1.0 - original implementation for Luis
+        # form 
+            # displays a calendar daypicker but with invalid dates disabled (already past dates, days where club is closed, days more than a month from today)
+            # displays only options of valid times (from 09:00 to 22:00, with a step of 30 minutes) (only enable to pick available times for the specific court)
+            # if reservation is for Saturday or Sunday, possibletimes are until 20:00 only (use possibletimesweekend array for choices)
+            # validation with date and time restrictions included (bookings need to be made a minimum of 30 minutes before playing time)
+            # bookings can only be made for the current and the next month
+        # database
+            # define schema (consider admin type)
+            # create tables
+            # insert SQL statements in app.py, where needed
+            # maximum of 2 bookings per day per person (1 hour) (except for admin)
+            # a booking is for 30 minutes (after booking is done, make the time for that specific day and court unavailable)
+            # have action for user to cancel booking, which makes the times of it available again
+            # create indexes where useful
+        # admin 
+            # show all bookings for each court for the selected day (default for today)
+            # delete route (only accepts POST) - admin has the ability to delete any reservation for any day and to book a court for an extended period of time (more than 1 hour per day)
+            # createindex route (only accepts POST) - admin is able to create indexes on tables
+            # bookday route (only accepts POST) - admin has the ability to delete bookings for the selected day (if any exists) and disable bookings for that day
+            # have way to register an admin with a special login
+            # admin logs in as a regular user
+            # create function on helpers.py to restrict admin page to be accesible by admin only (similar to login_required)
+        # more
+            # page which shows all current bookings for the logged in account
+            # organize code (comparisons to datetime type if value is not passed to a query (use validate_date function), make functions to simplify app.py)
+            # create email account for email functionality 
+            # send me an email when an booking or cancellation is made, with the action's info
+            # send email to user after a booking is made
+            # send email to user if one of its bookings are cancelled (both by the user himself or an admin)
+            # allow users to delete their account (delete all bookings for the account when the account is deleted and send a confirmation email)
+            # allow users to change their passwords on the app (need current password confirmation) or by email
+            # move email functionality to its own file
+            # implement REST architecture
+        # PostgreSQL
+            # have app be on PostgreSQL and update schema for PostgreSQL
+            # write algorithms to get possible times during the week and weekend, and to get courts
+            # change bookings to be of 1 hour instead of 30 minutes, while still allowing appointments to start at hour:00 and hour:30 (don't forget to update booking validation)
+            # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime
+            # improve email messages (include appname variable on titles)
+        # Account page
+            # show all useful account info (username, email, account type)  ########################
+            # have option to change email
+            # have user be able to change password by email
+        # change schema to drop NOT NULL constraint from people
+        # install postgresql on command line (psql)
+        # learn psql tools basics (https://gist.github.com/Kartones/dd3ff5ec5ea238d4c546)
+        # update code to reflect this (remove people being blank in validations) (add a blank value to people and set it to be the default) ########################
+            (when admin books a day, set people to nothing)
+        # disable unavailable booking hours when user is booking a court
+        # Scheduler - AWS Lambda
+            # if there are bookings in the next hour, send admin an email with all the bookings
+            # if a user has a booking in the next hour, send him an email
+        # Pre-Deployment
+            # session not ending properly when I restart flask
+            # test entire app
+            # basic styling (with SASS and React + Bootstrap)
+            # have a detailed Readme
+        # Deployment
+            # deploy and show to Luis
+    # version 2.0 - goal is to be a platform where users can book a court for different clubs
+        # create gmail business account to be the sender of the emails (change configurations to sender and on .env)
+        # speed up PostgreSQL/ElephantSQL queries (SELECT too but especially on INSERT and UPDATE)
+        # apply object-oriented programming (create classes for tennis clubs, admin) to make implementation of actions for users and admins easier
+        # have clubs be able to specify their timezone
+        # have businesses be able to add images to their profile page (use Cloudinary)
+        # convert user and admin actions to be compatible with the OOP architecture
+        # create new table to store different clubs (have club_name, number of courts, opening times, exact location, address)
+        # update schema
+        # have map (use mapbox) showing location of all courts
+        # create a profile page for each tennis club
+        # when booking, have option to select club (only show affiliated clubs). After selecting club, go to a new page where a booking for that club can be made
+        # update queries to show results for club when relevant
+        # update queries to show the club where the booking is made
+        # update insert and delete queries to only delete bookings for specified club
+        # have type super-admin (has the ability to be an admin for every club in every sport)
+        # only super-admin can create indexes
+        # admin type only allows to perform actions on the admin's specific club
+        # contacts page
+        # search bar with autocomplete functionality where users can search for tennis clubs
+        # major styling
+        # implement payment functionality (make it optional for businesses)
+        # create indexes where necessary (partial indexes ??)
+    # version 3.0 - have booking tennis courts be one of many possible types of bookings to be made, implement booking for other sports such as soccer, basketball, etc
+        # update search bar to show results for different categories (show sports offered first, and under it show the clubs)
+    # version 4.0 - implement non-sport related bookings, such as for restaurant tables, offices (like lawyer, doctor, etc), hair salons, etc
+        # async functionalities to prevent user from waiting when requests are made (from example, when an email is sent)
+        # add category to search bar to show search by type of booking (sports, restaurants, office, salon, etc)
+        # connect to yelp API and show useful info on business profile
+        # schedule Python code to run every 6 months or year to remove bookings from database and other features if needed so database runs smoother (store in another database? so data is lost completely lost)
+

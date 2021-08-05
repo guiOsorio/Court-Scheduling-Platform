@@ -1,7 +1,7 @@
 from helpers.funcs.actions.gets import getRegPossibleTimes, getRegCourts
 
 # Arrays for SelectField choices
-numofpeople = ["2", "3", "4"]
+numofpeople = ["Not specified", "2", "3", "4"]
 
 courts = getRegCourts(3)
 

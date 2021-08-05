@@ -17,11 +17,9 @@ from helpers.funcs.actions.updates import updateUserPassword, updateUserEmail
 from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate, validatePassword
 from helpers.funcs.requireds import login_required, admin_required, not_logged_in
-# Own helper lists
+# Own helper variables
 from helpers.variables.lists import numofpeople, courts, courts_all, possibletimes, possibletimesweekend
-# Dotenv
-from dotenv import load_dotenv
-load_dotenv()
+from helpers.variables.others import ADMIN_SECRET_PASSWORD, appname, link_to_site
 
 # Initialize app
 app = Flask(__name__)
@@ -34,9 +32,6 @@ try:
     createSchema()
 except psycopg2.errors.DuplicateTable:
     pass
-
-# Get environment variables
-ADMIN_SECRET_PASSWORD = os.environ.get('ADMIN_SECRET_PASSWORD')
 
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
@@ -51,10 +46,6 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 mail = Mail(app)
-
-# Store program's name
-appname = "Scheduling"
-link_to_site = f'<p>Visit us at <a href="www.google.com">{appname}.com</a></p>'                ############ HERE (update link to show correct website)
 
 # FLASK-WTF FORMS
 # Booking form
@@ -415,7 +406,7 @@ def book_all_day():
         selected_date = form_court_date.date.data
         selected_date_str = selected_date.strftime("%Y-%m-%d") # pass this into query
         selected_weekday = selected_date.strftime("%a") # pass this into query
-        people = 4 # default when admin makes a booking
+        people = numofpeople[0] # default when admin makes a booking
 
         if isDatePast(selected_date_str):
             return redirect("/admin")
@@ -606,19 +597,15 @@ if __name__ == '__main__':
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Account page
-    # have option to change email
-    # have user be able to change password by email
+# figure out index on validations.py validateIndex()
 # disable unavailable booking hours when user is booking a court
 # Scheduler - AWS Lambda - Thursday
     # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email
-# React - Thursday
-    # connect to React
 # Pre-Deployment - Friday
     # session not ending properly when I restart flask
     # test entire app
-    # basic styling (with SASS and JS where necessary + Bootstrap)
+    # styling (with SASS and JS where necessary + Bootstrap)
     # have a detailed Readme
 # Deployment - Saturday
     # deploy and show to Luis

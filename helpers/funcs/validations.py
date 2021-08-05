@@ -10,7 +10,7 @@ from helpers.funcs.actions.gets import getPrevTime, getNextTime
 
 
 def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, user_id):
-    if people == "" or court == "" or date == "" or time == "Choose a time":
+    if court == "" or date == "" or time == "Choose a time":
             flash("Please fill out all fields", "danger")
             return False
 
@@ -63,7 +63,7 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
 
     # Own validation
     if people not in numofpeople:
-        flash("Only 2 to 4 people are allowed per court", "danger")
+        flash(f"Invalid number of people. Only 2 to 4 people are allowed per court {people}", "danger")
         return False
     elif court not in courts:
         flash("Please select a valid court", "danger")

@@ -3,6 +3,7 @@ import psycopg2 ###########
 from werkzeug.security import generate_password_hash
 from flask import flash
 from helpers.variables.others import POSTGRE_URI #########
+from helpers.funcs.others import showDateToUserFormat
 
 con = psycopg2.connect(POSTGRE_URI)   #########
 
@@ -72,10 +73,17 @@ def createBooking(date, user_id, selected_date, time, court, people):
 
     selected_weekday = date.strftime("%A") # string current day of the week
 
-    cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court, people) 
+    if people == "Not specified":
+        cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court) 
+                VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s)""", 
+                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court})
+        con.commit()
+    else:  
+        cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court, people) 
                 VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s)""", 
                 {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people})
-    con.commit()
+        con.commit()
+    
 
     flash("Booking successful!!", "success")
 
@@ -139,18 +147,29 @@ def bookAllDay(selected_weekday, possibletimesweekend, user_id, selected_date_st
             if time == "Choose a time":
                 continue
             else:
-                cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court, people) VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s)",
-                            {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court, "people": people})
-                con.commit()
+                if people == "Not specified":
+                    cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court) VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s)",
+                            {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court})
+                    con.commit()
+                else:
+                    cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court, people) VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s)",
+                                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court, "people": people})
+                    con.commit()
     else:
         for time in possibletimes:
             if time == "Choose a time":
                 continue
             else:
-                cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court, people) VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s)",
-                            {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court, "people": people})
-                con.commit()
-    flash(f"Court succesfully booked for {selected_date_str}", "success")
+                if people == "Not specified":
+                    cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court) VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s)",
+                            {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court})
+                    con.commit()
+                else:
+                    cur.execute("INSERT INTO bookings (user_id, week_day, date, time, court, people) VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s)",
+                                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date_str, "time": time, "court": court, "people": people})
+                    con.commit()
+    selected_date_str_showuser = showDateToUserFormat(selected_date_str)
+    flash(f"Court succesfully booked for {selected_date_str_showuser}", "success")
 
     con.close()
 

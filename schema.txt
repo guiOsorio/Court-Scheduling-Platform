@@ -17,7 +17,7 @@ BOOKINGS TABLE:
                             date DATE NOT NULL,
                             time VARCHAR(10) NOT NULL,
                             court INTEGER NOT NULL,
-                            people INTEGER NOT NULL,
+                            people INTEGER,
                             made_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             PRIMARY KEY(booking_id),
                             FOREIGN KEY(user_id) REFERENCES users(id)
