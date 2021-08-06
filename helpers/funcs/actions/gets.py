@@ -9,7 +9,7 @@ def getUserType(id):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT type FROM users WHERE id = %(id)s", {"id": id})
+    cur.execute("SELECT type FROM users WHERE id = %(id)s;", {"id": id})
     type = cur.fetchone()[0]
 
     con.close()
@@ -23,7 +23,7 @@ def getAllUsernames():
     cur = con.cursor()
 
     # Get all usernames
-    cur.execute("SELECT username FROM users")
+    cur.execute("SELECT username FROM users;")
     usernames = cur.fetchall()
 
     con.close()
@@ -46,7 +46,7 @@ def getUpcomingUserBookings(user_id, current_date_str):
     cur = con.cursor()
 
     # get number of upcoming bookings for the current user
-    cur.execute("SELECT COUNT(*) FROM bookings WHERE user_id = %(user_id)s AND date >= %(current_date)s", {"user_id": user_id, "current_date": current_date_str})
+    cur.execute("SELECT COUNT(*) FROM bookings WHERE user_id = %(user_id)s AND date >= %(current_date)s;", {"user_id": user_id, "current_date": current_date_str})
     upcoming_user_bookings = cur.fetchone()[0]
 
     con.close()
@@ -63,12 +63,12 @@ def getUserBookingsData(user_id, selected_date, showAll = False):
         current_date_str = getCurrDate()
         # Find all bookings for logged in user
         cur.execute(""" SELECT week_day, date, time, court, people, booking_id FROM bookings
-                    WHERE user_id = %(user_id)s AND date >= %(current_date)s ORDER BY date, time""", {"user_id": user_id, "current_date": current_date_str})
+                    WHERE user_id = %(user_id)s AND date >= %(current_date)s ORDER BY date, time;""", {"user_id": user_id, "current_date": current_date_str})
         bookings_data = cur.fetchall()
     else:
         # Find bookings for logged in user for a specific date
         cur.execute(""" SELECT week_day, date, time, court, people, booking_id FROM bookings
-                    WHERE user_id = %(user_id)s AND date = %(date)s ORDER BY time""", {"user_id": user_id, "date": selected_date})
+                    WHERE user_id = %(user_id)s AND date = %(date)s ORDER BY time;""", {"user_id": user_id, "date": selected_date})
         bookings_data = cur.fetchall()
 
     con.close()
@@ -85,11 +85,11 @@ def getBookingsData(court, selected_date):
     if court == "All courts":
         cur.execute(""" SELECT username, week_day, date, time, court, people, booking_id FROM bookings
                     JOIN users ON user_id = id
-                    WHERE date = %(date)s ORDER BY time """, {"date": selected_date})
+                    WHERE date = %(date)s ORDER BY time; """, {"date": selected_date})
     else:
         cur.execute(""" SELECT username, week_day, date, time, court, people, booking_id FROM bookings
                     JOIN users ON user_id = id
-                    WHERE date = %(date)s AND court = %(court)s ORDER BY time """, {"date": selected_date, "court": court})
+                    WHERE date = %(date)s AND court = %(court)s ORDER BY time; """, {"date": selected_date, "court": court})
     bookings_data = cur.fetchall() # populate data to display
 
     con.close()
@@ -104,11 +104,11 @@ def getDayBookingsCount(court, selected_date_str):
 
     # if "All courts" option selected, show number of bookings for all courts
     if court == "All courts":
-        cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(date)s", {"date": selected_date_str})
+        cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(date)s;", {"date": selected_date_str})
         day_count = cur.fetchone()[0]
     # else, count number of bookings for the selected day and court
     else:
-        cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(date)s AND court = %(court)s", {"date": selected_date_str, "court": court})
+        cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(date)s AND court = %(court)s;", {"date": selected_date_str, "court": court})
         day_count = cur.fetchone()[0]
 
     con.close()
@@ -125,14 +125,14 @@ def getAllBookingsCount(input_range, court, current_time_str):
     if input_range == "upcoming": # only count bookings for today and the future
         current_date_str = getCurrDate()
         if court == "All courts":
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date > %(current_date)s", {"current_date": current_date_str})
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date > %(current_date)s;", {"current_date": current_date_str})
             total_count = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(current_date)s AND time > %(current_time)s", {"current_date": current_date_str, "current_time": current_time_str})
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(current_date)s AND time > %(current_time)s;", {"current_date": current_date_str, "current_time": current_time_str})
             total_count += cur.fetchone()[0]
         else:
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date > %(current_date)s AND court = %(court)s", {"current_date": current_date_str, "court": court})
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date > %(current_date)s AND court = %(court)s;", {"current_date": current_date_str, "court": court})
             total_count = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(current_date)s AND court = %(court)s AND time > %(current_time)s",
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE date = %(current_date)s AND court = %(court)s AND time > %(current_time)s;",
                         {"current_date": current_date_str, "court": court, "current_time": current_time_str})
             total_count += cur.fetchone()[0]
     elif input_range == "total": # count all bookings regardless of date
@@ -140,7 +140,7 @@ def getAllBookingsCount(input_range, court, current_time_str):
             cur.execute("SELECT COUNT(*) FROM bookings")
             total_count = cur.fetchone()[0]
         else:
-            cur.execute("SELECT COUNT(*) FROM bookings WHERE court = %(court)s", {"court": court})
+            cur.execute("SELECT COUNT(*) FROM bookings WHERE court = %(court)s;", {"court": court})
             total_count = cur.fetchone()[0]
     else:
         isRangeValid = False
@@ -157,7 +157,7 @@ def getUserEmail(user_id):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT email FROM users WHERE id = %(id)s", {"id": user_id})
+    cur.execute("SELECT email FROM users WHERE id = %(id)s;", {"id": user_id})
     email = cur.fetchone()[0]
 
     con.close()
@@ -170,7 +170,7 @@ def getBookingInfo(booking_id):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT court, date, time FROM bookings WHERE booking_id = %(booking_id)s", {"booking_id": booking_id})
+    cur.execute("SELECT court, date, time FROM bookings WHERE booking_id = %(booking_id)s;", {"booking_id": booking_id})
     booking_info = cur.fetchall()
 
     con.close()
@@ -183,7 +183,7 @@ def getUserId(booking_id):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT id FROM users JOIN bookings ON id = user_id WHERE booking_id = %(booking_id)s", {"booking_id": booking_id})
+    cur.execute("SELECT id FROM users JOIN bookings ON id = user_id WHERE booking_id = %(booking_id)s;", {"booking_id": booking_id})
     id = cur.fetchone()[0]
 
     con.close()
@@ -196,7 +196,7 @@ def getBookingId(court, selected_date, time):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT booking_id FROM bookings WHERE court = %(court)s AND date = %(selected_date)s AND time = %(time)s",
+    cur.execute("SELECT booking_id FROM bookings WHERE court = %(court)s AND date = %(selected_date)s AND time = %(time)s;",
                 {"court": court, "selected_date": selected_date, "time": time})
     booking_id = cur.fetchone()[0]
 
@@ -210,8 +210,10 @@ def getUsername(user_id):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    cur.execute("SELECT username FROM users WHERE id = %(user_id)s", {"user_id": user_id})
+    cur.execute("SELECT username FROM users WHERE id = %(user_id)s;", {"user_id": user_id})
     username = cur.fetchone()[0]
+
+    con.close()
 
     return username
 
@@ -272,3 +274,15 @@ def getNextTime(time):
         nexttime = nexthour + ":00"
     
     return nexttime
+
+def getUserAccountData(user_id):
+    # Connect to database
+    con = psycopg2.connect(POSTGRE_URI)
+    cur = con.cursor()
+
+    cur.execute("SELECT username, email, type FROM users WHERE id = %(user_id)s;", {"user_id": user_id})
+    data = cur.fetchone()
+
+    con.close()
+
+    return data

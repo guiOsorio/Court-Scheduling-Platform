@@ -12,7 +12,7 @@ from flask_mail import Mail, Message
 from helpers.funcs.actions.creates import createSchema, createIndex, createBooking, createUser, createAccount, bookAllDay
 from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, deleteAllUserBookings, deleteAllDayBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
-    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername
+    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername, getUserAccountData
 from helpers.funcs.actions.updates import updateUserPassword, updateUserEmail
 from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate, validatePassword
@@ -99,8 +99,6 @@ def makebooking():
         if validateBooking(people, court, date, time, numofpeople, courts, possibletimesweekend, possibletimes, user_id):
 
             createBooking(date, user_id, selected_date, time, court, people)
-            booking_id = getBookingId(court, selected_date, time)
-            booking_info = getBookingInfo(booking_id)
 
             selected_date_showuser = showDateToUserFormat(selected_date)
             title = f"{appname} - Booking created"
@@ -197,10 +195,6 @@ def mybookings():
 
     user_id = session["user_id"] # store current user's id
 
-    current_date_str = getCurrDate()
-
-    upcoming_user_bookings = getUpcomingUserBookings(user_id, current_date_str)
-
     # Shows the user's bookings for a selected day
     if "show_day" in request.form and form.validate_on_submit():
         date = form.date.data # datetime.date
@@ -209,9 +203,9 @@ def mybookings():
         # Get data for all of the user's bookings in the selected day 
         bookings_data = getUserBookingsData(user_id, selected_date)
 
-        date_showuser = showDateToUserFormat(date)
+        selected_date_showuser = showDateToUserFormat(selected_date)
         if not bookings_data:
-            msg = f"You have no bookings for {date_showuser}"
+            msg = f"You have no bookings for {selected_date_showuser}"
             return render_template("mybookings.html", form=form, msg=msg)
         else:
             return render_template("mybookings.html", form=form, bd=bookings_data)
@@ -227,6 +221,9 @@ def mybookings():
             return render_template("mybookings.html", form=form, msg=msg)
         else:
             return render_template("mybookings.html", form=form, bd=bookings_data)
+    
+    current_date_str = getCurrDate()
+    upcoming_user_bookings = getUpcomingUserBookings(user_id, current_date_str)
 
     # check if there are any upcoming bookings, if not, return no upcoming bookings for {user}
     if upcoming_user_bookings == 0:
@@ -501,9 +498,10 @@ def create_admin():
 def account():
     user_id = session["user_id"]
 
-    username = getUsername(user_id)
-    email_address = getUserEmail(user_id)
-    type = getUserType(user_id)
+    data = getUserAccountData(user_id)
+    username = data[0]
+    email_address = data[1]
+    type = data[2]
     userInfo = {"uname": username, "eaddress": email_address, "type": type}
 
     return render_template("account.html", userInfo=userInfo)
@@ -515,8 +513,9 @@ def change_password():
 
     if "changepassword" in request.form and request.method == "POST":
         password = request.form.get("password")
-        username = getUsername(user_id)
-        recipient = getUserEmail(user_id) 
+        data = getUserAccountData(user_id)
+        username = data[0]
+        recipient = data[1]
         newpassword = request.form.get("newpassword")
         confirmation = request.form.get("confirmation")
 
@@ -574,8 +573,9 @@ def delete_account():
 
     if "deleteaccount" in request.form and request.method == "POST":
         password = request.form.get("password")
-        username = getUsername(user_id)
-        recipient = getUserEmail(user_id)
+        data = getUserAccountData(user_id)
+        username = data[0]
+        recipient = data[1]
         if deleteUserAccount(user_id, password):
             # Email new admin
             title = f"Goodbye from {appname}"
@@ -597,8 +597,6 @@ if __name__ == '__main__':
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# figure out index on validations.py validateIndex()
-# create indexes on schema
 # Scheduler - AWS Lambda
     # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email

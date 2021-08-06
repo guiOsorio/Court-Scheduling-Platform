@@ -201,9 +201,8 @@ def validateIndex(name, table, columns_input, columns):
     # if table doesn't exist - table needs to exist and have at least one row to have an index created
     # get name of all tables in the schema
     cur.execute("""SELECT table_name FROM information_schema.tables                         
-                    WHERE table_schema='public' AND table_type='BASE TABLE';""")                                ##################### TEST THIS
+                    WHERE table_schema='public' AND table_type='BASE TABLE';""")
     tables_in_db = cur.fetchall()
-    con.close()
 
     # check if table exists
     num_of_tables = len(tables_in_db)
@@ -214,12 +213,13 @@ def validateIndex(name, table, columns_input, columns):
             break
         elif z == num_of_tables - 1: # no corresponding table found in db
             flash("Table does not exist", "danger")
+            con.close()
             return False
         else:
             z += 1
     
     # Variable to store the name of all column names in the schema in a list (schema_columns_list)
-    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = 'public';")             #################### TEST THIS
+    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = 'public';")
     schema_columns = cur.fetchall()
     schema_columns_list = []
     for column in schema_columns:
@@ -229,8 +229,9 @@ def validateIndex(name, table, columns_input, columns):
         # check if all inputted columns belong to a table in the schema
         if column not in schema_columns_list:
             flash("Column does not exist", "danger")
+            con.close()
             return False
-
+    con.close()
     return True
 
 
