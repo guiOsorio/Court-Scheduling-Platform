@@ -47,11 +47,7 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
     prevtime = getPrevTime(time)
     nexttime = getNextTime(time)
 
-    # Check if that time is already booked
-    cur.execute("""SELECT * FROM bookings
-                WHERE date = %(date)s AND time = %(prevtime)s AND court = %(court)s""",
-                {"date": selected_date, "prevtime": prevtime, "court": court})
-    is_prevtime_booked = cur.fetchone()
+    # Check if that time is already booked or if the next time is already booked
     cur.execute("""SELECT * FROM bookings
                 WHERE date = %(date)s AND time = %(time)s AND court = %(court)s""",
                 {"date": selected_date, "time": time, "court": court})
@@ -76,9 +72,6 @@ def validateBooking(people, court, date, time, numofpeople, courts, ptw, pt, use
         return False
     elif selected_day_bookings >= 2 and user_type != "admin":
         flash("A maximum of 2 bookings per person per day is allowed", "danger")
-        return False
-    elif is_prevtime_booked:
-        flash("This court is already booked for this time (a booking is already in place for 30 minutes before your selected booking time)", "danger")
         return False
     # if the booking hour is already booked or if previous possible booking time or next possible booking time is booked, don't allow booking (bookings are for 1 hour)
     elif is_exacttime_booked:

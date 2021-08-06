@@ -83,7 +83,7 @@ def getBookingsData(court, selected_date):
 
     # Find upcoming bookings for that day if all courts option is provided
     if court == "All courts":
-        cur.execute(""" SELECT username, week_day, date, time, court, people, booking_id FROM bookings
+        cur.execute(""" SELECT username, week_day, date, time, court, people, booking_id, email FROM bookings
                     JOIN users ON user_id = id
                     WHERE date = %(date)s ORDER BY time; """, {"date": selected_date})
     else:
@@ -226,15 +226,13 @@ def getRegPossibleTimes(opening, close):
         if i < 10:
             t = dt.time(i, 0)
             possibletimes.append("0{}:{}0".format(t.hour, t.minute))
-            if i != close - 1: # for the last hour, only have a booking starting at :00, none at :30
-                t2 = dt.time(i, 30)
-                possibletimes.append("0{}:{}".format(t2.hour, t2.minute))
+            t2 = dt.time(i, 30)
+            possibletimes.append("0{}:{}".format(t2.hour, t2.minute))
         else:
             t = dt.time(i, 0)
             possibletimes.append("{}:{}0".format(t.hour, t.minute))
-            if i != close - 1: # for the last hour, only have a booking starting at :00, none at :30
-                t2 = dt.time(i, 30)
-                possibletimes.append("{}:{}".format(t2.hour, t2.minute))
+            t2 = dt.time(i, 30)
+            possibletimes.append("{}:{}".format(t2.hour, t2.minute))
     return possibletimes
 
 # Function which returns a list of all the courts from a club, all options set to true adds "All courts" entry to the list

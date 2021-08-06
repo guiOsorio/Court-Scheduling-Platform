@@ -1,18 +1,18 @@
-.nav {
-    background-color: $color-primary !important;
-    margin-bottom: 1rem;
+* {
+    margin: 0;
+    padding: 0;
+}
 
-    &__title {
-        color: $color-white !important;
-        font-weight: bold;
-    }
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
 
-    &-link {
-        color: $color-black !important;
-        font-weight: bold;
+html {
+    box-sizing: border-box;
+}
 
-        &:hover {
-            color: $color-grey !important;
-        }
-    }
+.content {
+    padding: 0 2rem;
 }

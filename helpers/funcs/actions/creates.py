@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash
 from flask import flash
 from helpers.variables.others import POSTGRE_URI #########
 from helpers.funcs.others import showDateToUserFormat
+from helpers.funcs.actions.gets import getNextTime
+from helpers.variables.lists import possibletimes, possibletimesweekend
 
 con = psycopg2.connect(POSTGRE_URI)   #########
 
@@ -71,18 +73,45 @@ def createBooking(date, user_id, selected_date, time, court, people):
     con = psycopg2.connect(POSTGRE_URI)
     cur = con.cursor()
 
-    selected_weekday = date.strftime("%A") # string current day of the week
+    nexttime = getNextTime(time)
+    selected_weekday = date.strftime("%A") # string selected day of the week
 
-    if people == "Not specified":
-        cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court) 
-                VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s)""", 
-                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court})
-        con.commit()
-    else:  
-        cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court, people) 
-                VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s)""", 
-                {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people})
-        con.commit()
+    if selected_weekday == "Saturday" or selected_weekday == "Sunday":
+        if people == "Not specified":
+            if time == possibletimesweekend[-1]:
+                cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court) 
+                        VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court})
+                con.commit()
+            else:
+                cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court) 
+                        VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s), (%(user_id)s, %(week_day)s, %(date)s, %(nexttime)s, %(court)s)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "nexttime": nexttime})
+                con.commit()
+        else:
+            if time == possibletimesweekend[-1]:
+                cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court, people) 
+                        VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s), (%(user_id)s, %(week_day)s, %(date)s, %(nexttime)s, %(court)s, %(people)s)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people, "nexttime": nexttime})
+                con.commit()
+    else:
+        if people == "Not specified":
+            if time == possibletimes[-1]:
+                cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court) 
+                        VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court})
+                con.commit()
+            else:
+                cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court) 
+                        VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s), (%(user_id)s, %(week_day)s, %(date)s, %(nexttime)s, %(court)s)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "nexttime": nexttime})
+                con.commit()
+        else:
+            if time == possibletimes[-1]:
+                cur.execute("""INSERT INTO bookings (user_id, week_day, date, time, court, people) 
+                        VALUES (%(user_id)s, %(week_day)s, %(date)s, %(time)s, %(court)s, %(people)s), (%(user_id)s, %(week_day)s, %(date)s, %(nexttime)s, %(court)s, %(people)s)""", 
+                        {"user_id": user_id, "week_day": selected_weekday, "date": selected_date, "time": time, "court": court, "people": people, "nexttime": nexttime})
+                con.commit()
     
 
     flash("Booking successful!!", "success")

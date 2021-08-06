@@ -18,7 +18,7 @@
 
     <title>Scheduling Demo</title>
 </head>
-<body class="container">
+<body>
 
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-md navbar-light bg-light border nav">
@@ -58,7 +58,10 @@
     {% endfor %}
     
     <!-- CONTENT -->
-    {% block content %}{% endblock %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    
 
 </body>
 </html>

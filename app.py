@@ -590,6 +590,71 @@ def delete_account():
 
 
 
+
+
+
+
+
+
+############################################################################## TODO (FIX) LAMBDA FUNCTION TOADMIN ###################################################################
+
+@app.route("/test", methods=["GET"])
+def test():
+    import os
+    import psycopg2
+    import smtplib
+
+    from datetime import datetime
+    from email.message import EmailMessage
+    from collections import defaultdict
+    from helpers.variables.others import POSTGRE_URI
+    from helpers.variables.lists import courts, possibletimes
+
+    con = psycopg2.connect(POSTGRE_URI)
+    cur = con.cursor()
+
+    # get current date as string ("%Y"-"%m"-"%-d")
+    current_date = datetime.now()
+    current_date_str = current_date.strftime("%Y-%m-%d")
+
+    # get bookings where date = current_date
+    cur.execute("SELECT booking_id FROM bookings WHERE date = %(current_date_str)s", {"current_date_str": current_date_str})
+    day_bookings_queryresult = cur.fetchall()
+    day_bookings = ()
+    for booking in day_bookings_queryresult:
+        day_bookings = day_bookings + (booking[0],)
+    # get info from bookings for the day
+    daytime_dict = dict.fromkeys(possibletimes[1:]) # day_dict is a dict of dicts (dict[time]['username', 'time', 'court']) with all times in possibletimes
+    i = 0
+    for time in possibletimes:
+        daytime_dict[possibletimes[i]] = dict.fromkeys(["username"])
+        i += 1
+
+    courts_dict = dict.fromkeys(courts)
+    k = 0
+    for court in courts:
+        courts_dict[courts[k]] = daytime_dict
+        k += 1
+
+    cur.execute("SELECT username, time, court FROM bookings JOIN users ON user_id = id WHERE booking_id IN %(day_bookings)s ORDER BY time, court", {"day_bookings": day_bookings})
+    day_info = cur.fetchall()
+
+    for info in day_info:
+        courts_dict[str(info[2])][info[1]]["username"] = info[0]
+
+    halflengthpt = int(len(possibletimes) / 2)
+    
+    con.close()
+    
+    return render_template("test.html", cd=courts_dict, pt=possibletimes, hlenpt=halflengthpt)
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
@@ -598,7 +663,6 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Scheduler - AWS Lambda
-    # if there are bookings in the next hour, send admin an email with all the bookings
     # if a user has a booking in the next hour, send him an email
 # Pre-Deployment
     # session not ending properly when I restart flask

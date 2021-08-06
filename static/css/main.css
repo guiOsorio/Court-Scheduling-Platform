@@ -1,3 +1,37 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+.content {
+  padding: 0 2rem;
+}
+
+.booking-form {
+  width: 40%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.booking-form label {
+  padding-top: 2rem;
+}
+.booking-form button {
+  width: 50%;
+  margin: 2rem auto;
+}
+
 .nav {
   background-color: #0F70A9 !important;
   margin-bottom: 1rem;
@@ -12,21 +46,6 @@
 }
 .nav-link:hover {
   color: #999 !important;
-}
-
-.booking-form {
-  width: 40%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.booking-form label {
-  padding-top: 20px;
-}
-.booking-form button {
-  width: 50%;
-  margin: 20px auto;
 }
 
 /*# sourceMappingURL=main.css.map */
