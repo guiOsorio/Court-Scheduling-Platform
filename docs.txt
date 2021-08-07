@@ -66,6 +66,7 @@
         # update code to reflect this (remove people being blank in validations) (add a blank value to people and set it to be the default)
             (when admin books a day, set people to nothing)
         # Scheduler - AWS Lambda
+            # if there are bookings in the next hour, send admin an email with all the bookings (send table with all possible booking hours and username of person who booked it or '-')
             # if a user has a booking in the next hour, send him an email
         # Pre-Deployment
             # session not ending properly when I restart flask
@@ -90,12 +91,11 @@
                 # JS
                     # disable unavailable booking hours when user is booking a court
                     # show current date and time (hours and minutes) to update every minute on top of book a court page
+                    # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
             # have a detailed Readme
         # Deployment
             # deploy and show to Luis
     # version 2.0 - goal is to be a platform where users can book a court for different clubs
-        # Scheduler - AWS Lambda
-            # if there are bookings in the next hour, send admin an email with all the bookings (send table with all possible booking hours and username of person who booked it or '-')
         # create gmail business account to be the sender of the emails (change configurations to sender and on .env)
         # speed up PostgreSQL/ElephantSQL queries (SELECT too but especially on INSERT and UPDATE)
         # apply object-oriented programming (create classes for tennis clubs, admin) to make implementation of actions for users and admins easier

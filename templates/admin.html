@@ -4,6 +4,8 @@
 
     <h1>ADMIN</h1>
 
+    <a href="/today">Today's bookings</a>
+
     <h3>Check day</h3>
 
     <form action="/admin" method="POST">
@@ -125,7 +127,5 @@
             <p><strong>Count of {{ input_range }} bookings for court {{ court }} is {{ total_count }}</strong></p>
         {% endif %}
     {% endif %}
-
-{{bi}}
 
 {% endblock %}

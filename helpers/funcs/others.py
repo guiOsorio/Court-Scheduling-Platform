@@ -17,6 +17,16 @@ def isDatePast(selected_date_str):
     else:
         return False
 
+def isWeekend(day): # accepts a datetime argument
+    current_week_day = day.strftime("%A")
+    weekend_days = ['Saturday', 'Sunday']
+
+    if current_week_day in weekend_days:
+        return True
+    else:
+        return False
+
+
 def passwordEqualsHash(user_id, password):
     # Connect to database
     con = psycopg2.connect(POSTGRE_URI)

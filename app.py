@@ -12,9 +12,10 @@ from flask_mail import Mail, Message
 from helpers.funcs.actions.creates import createSchema, createIndex, createBooking, createUser, createAccount, bookAllDay
 from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, deleteAllUserBookings, deleteAllDayBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
-    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername, getUserAccountData
+    getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername, getUserAccountData, \
+    getTableData
 from helpers.funcs.actions.updates import updateUserPassword, updateUserEmail
-from helpers.funcs.others import isDatePast, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
+from helpers.funcs.others import isDatePast, isWeekend, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate, validatePassword
 from helpers.funcs.requireds import login_required, admin_required, not_logged_in
 # Own helper variables
@@ -589,69 +590,21 @@ def delete_account():
             return redirect("/account")
 
 
-
-
-
-
-
-
-
-############################################################################## TODO (FIX) LAMBDA FUNCTION TOADMIN ###################################################################
-
-@app.route("/test", methods=["GET"])
-def test():
-    import os
-    import psycopg2
-    import smtplib
-
-    from datetime import datetime
-    from email.message import EmailMessage
-    from collections import defaultdict
-    from helpers.variables.others import POSTGRE_URI
-    from helpers.variables.lists import courts, possibletimes
-
-    con = psycopg2.connect(POSTGRE_URI)
-    cur = con.cursor()
-
+@app.route("/today", methods=["GET"])
+@admin_required
+def today():
     # get current date as string ("%Y"-"%m"-"%-d")
     current_date = datetime.now()
     current_date_str = current_date.strftime("%Y-%m-%d")
 
-    # get bookings where date = current_date
-    cur.execute("SELECT booking_id FROM bookings WHERE date = %(current_date_str)s", {"current_date_str": current_date_str})
-    day_bookings_queryresult = cur.fetchall()
-    day_bookings = ()
-    for booking in day_bookings_queryresult:
-        day_bookings = day_bookings + (booking[0],)
-    # get info from bookings for the day
-    daytime_dict = dict.fromkeys(possibletimes[1:]) # day_dict is a dict of dicts (dict[time]['username', 'time', 'court']) with all times in possibletimes
-    i = 0
-    for time in possibletimes:
-        daytime_dict[possibletimes[i]] = dict.fromkeys(["username"])
-        i += 1
-
-    courts_dict = dict.fromkeys(courts)
-    k = 0
-    for court in courts:
-        courts_dict[courts[k]] = daytime_dict
-        k += 1
-
-    cur.execute("SELECT username, time, court FROM bookings JOIN users ON user_id = id WHERE booking_id IN %(day_bookings)s ORDER BY time, court", {"day_bookings": day_bookings})
-    day_info = cur.fetchall()
-
-    for info in day_info:
-        courts_dict[str(info[2])][info[1]]["username"] = info[0]
-
-    halflengthpt = int(len(possibletimes) / 2)
-    
-    con.close()
-    
-    return render_template("test.html", cd=courts_dict, pt=possibletimes, hlenpt=halflengthpt)
-
-
-
-
-
+    if isWeekend(current_date):
+        courts_dict = getTableData(current_date_str, courts, possibletimes, possibletimesweekend, True)
+        halflengthpt = int(len(possibletimesweekend) / 2) + 1
+        return render_template("today.html", cd=courts_dict, pt=possibletimesweekend, hlenpt=halflengthpt) 
+    else: # today is not a weekend day
+        courts_dict = getTableData(current_date_str, courts, possibletimes, possibletimesweekend, False) 
+        halflengthpt = int(len(possibletimes) / 2) + 1
+        return render_template("today.html", cd=courts_dict, pt=possibletimes, hlenpt=halflengthpt)
 
 
 
@@ -681,6 +634,9 @@ if __name__ == '__main__':
         # login (login.html)
             # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
             # have login form be on the center of the page and with a different background
+        # /today (AWS Lambda + page)
+            # if there are bookings in the next hour, send admin an email with all the bookings (send table with all possible booking hours and username of person who booked it or '-')
+            # design tables to be responsive and look nice
         # add footer to the layout
         # JS
             # disable unavailable booking hours when user is booking a court

@@ -284,3 +284,77 @@ def getUserAccountData(user_id):
     con.close()
 
     return data
+
+
+def getTableData(current_date_str, courts, possibletimes, possibletimesweekend, weekend):
+    courts_dict = dict.fromkeys(courts)
+    fields = ["username"]
+
+    con = psycopg2.connect(POSTGRE_URI)
+    cur = con.cursor()
+
+    if weekend:
+        i = 0
+        for court in courts_dict:
+            courts_dict[courts[i]] = dict.fromkeys(possibletimesweekend)
+            for time in possibletimesweekend:
+                courts_dict[courts[i]][time] = dict.fromkeys(fields)
+            i += 1
+
+        # get bookings where date = current_date
+        cur.execute("SELECT booking_id FROM bookings WHERE date = %(current_date_str)s", {"current_date_str": current_date_str})
+        day_bookings_queryresult = cur.fetchall()
+        day_bookings = ()
+        for booking in day_bookings_queryresult:
+            day_bookings = day_bookings + (booking[0],)
+        # get info from bookings for the day
+        daytime_dict = dict.fromkeys(possibletimesweekend[1:]) # day_dict is a dict of dicts (dict[time]['username', 'time', 'court']) with all times in possibletimesweekend
+        i = 0
+        for time in possibletimesweekend:
+            daytime_dict[possibletimesweekend[i]] = dict.fromkeys(["username"])
+            i += 1
+
+        if day_bookings:
+            # get the relevant data from the day's bookings
+            cur.execute("SELECT username, time, court FROM bookings JOIN users ON user_id = id WHERE booking_id IN %(day_bookings)s ORDER BY time, court", {"day_bookings": day_bookings})
+            day_info = cur.fetchall()
+
+            for info in day_info:
+                info_court = str(info[2])
+                time = info[1]
+                courts_dict[info_court][time]["username"] = info[0]
+        con.close()
+    
+    else: # not a weekend day
+        i = 0
+        for court in courts_dict:
+            courts_dict[courts[i]] = dict.fromkeys(possibletimes)
+            for time in possibletimes:
+                courts_dict[courts[i]][time] = dict.fromkeys(fields)
+            i += 1
+
+        # get bookings where date = current_date
+        cur.execute("SELECT booking_id FROM bookings WHERE date = %(current_date_str)s", {"current_date_str": current_date_str})
+        day_bookings_queryresult = cur.fetchall()
+        day_bookings = ()
+        for booking in day_bookings_queryresult:
+            day_bookings = day_bookings + (booking[0],)
+        # get info from bookings for the day
+        daytime_dict = dict.fromkeys(possibletimes[1:]) # day_dict is a dict of dicts (dict[time]['username', 'time', 'court']) with all times in possibletimes
+        i = 0
+        for time in possibletimes:
+            daytime_dict[possibletimes[i]] = dict.fromkeys(["username"])
+            i += 1
+
+        if day_bookings:
+            # get the relevant data from the day's bookings
+            cur.execute("SELECT username, time, court FROM bookings JOIN users ON user_id = id WHERE booking_id IN %(day_bookings)s ORDER BY time, court", {"day_bookings": day_bookings})
+            day_info = cur.fetchall()
+
+            for info in day_info:
+                info_court = str(info[2])
+                time = info[1]
+                courts_dict[info_court][time]["username"] = info[0]
+        con.close()
+    
+    return courts_dict
