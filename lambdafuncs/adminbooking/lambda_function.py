@@ -124,6 +124,7 @@ def getTableData(current_date_str, courts, possibletimes, possibletimesweekend, 
     
     return courts_dict
 
+
 def lambda_handler(event, context):
     # get current date as string ("%Y"-"%m"-"%-d")
     current_date = datetime.now()
@@ -153,4 +154,94 @@ def lambda_handler(event, context):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(MAIL_ADDRESS, MAIL_PASSWORD)
         smtp.send_message(msg)
+
+
+
+
+# {% for court in cd %}
+
+# <div class="court-times">
+#     <h3>Court {{ court }}</h3>
+    
+#     <table>
+#         <thead>
+#             <tr>
+#                 {% for time in pt[1:hlenpt] %}
+#                     {% if time != 'Choose a time' %}
+#                         <th>{{ time }}</th>
+#                     {% endif %}
+#                 {% endfor %}
+#             </tr>
+#             <tr>
+#                 {% for time in cd[court] %}
+#                     {% if time in pt[1:hlenpt] %}
+#                         {% if cd[court][time]["username"] %}
+#                             {% if cd[court][time]["username"]|length > 8 %}
+#                                 <td>{{ cd[court][time]["username"][:7] }}..</td>
+#                             {% else %}
+#                                 <td>{{ cd[court][time]["username"] }}</td>
+#                             {% endif %}
+#                         {% else %}
+#                             <td> - </td>
+#                         {% endif %}
+#                     {% endif %}
+#                 {% endfor %}
+#             </tr>
+#         </thead>
+#     </table>
+    
+#     <table>
+#         <thead>
+#             <tr>
+#                 {% for time in pt[hlenpt:] %}
+#                     {% if time != 'Choose a time' %}
+#                         <th>{{ time }}</th>
+#                     {% endif %}
+#                 {% endfor %}
+#             </tr>
+#             <tr>
+#                 {% for time in cd[court] %}
+#                     {% if time in pt[hlenpt:] %}
+#                         {% if cd[court][time]["username"] %}
+#                             {% if cd[court][time]["username"]|length > 8 %}
+#                                 <td>{{ cd[court][time]["username"][:7] }}..</td>
+#                             {% else %}
+#                                 <td>{{ cd[court][time]["username"] }}</td>
+#                             {% endif %}
+#                         {% else %}
+#                             <td> - </td>
+#                         {% endif %}
+#                     {% endif %}
+#                 {% endfor %}
+#             </tr>
+#         </thead>
+#     </table>
+# </div>
+
+# {% endfor %}
+
+# <style>
+#     .court-times {
+#         border: 1px solid #777;
+#         text-align: center;
+#         margin-bottom: 20px;
+#         overflow-x: auto;
+#     }
+#     table {
+#         font-size: 18px;
+#         margin: 0 auto;
+#     }
+#     tr * {
+#         padding: 7px 15px;
+#     }
+
+#     @media (max-width: 600px) {
+#         table {
+#             font-size: 10px;
+#         }
+#         tr * {
+#             padding: 4px 10px;
+#         }
+#     }
+# </style>
 
