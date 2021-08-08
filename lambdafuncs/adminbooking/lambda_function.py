@@ -1,6 +1,8 @@
 # AWS Lambda
 # send admins an email with all the bookings for the day
 # execute this function every day at 8 am
+# https://www.youtube.com/watch?v=aqnJvXOIr6
+
 import os
 import psycopg2
 import smtplib
@@ -55,7 +57,7 @@ def getTableData(current_date_str, courts, possibletimes, possibletimesweekend, 
     courts_dict = dict.fromkeys(courts)
     fields = ["username"]
 
-    con = psycopg2.connect(POSTGRE_URI) # make a system variable on AWS Lambda
+    con = psycopg2.connect(os.environ.get('POSTGRE_URI')) # make a system variable on AWS Lambda
     cur = con.cursor()
 
     if weekend:
@@ -124,38 +126,147 @@ def getTableData(current_date_str, courts, possibletimes, possibletimesweekend, 
     
     return courts_dict
 
+# From today.html, form a string to mark the html to be sent on msg
+def getAdminEmailHTML(court, current_date, halflengthpt, courts_dict):
+    court_msg = f"""<div class='court-times' style='border: 1px solid #777; text-align: center; margin-bottom: 20px; overflow-x: auto;'>
+                        <h1>Court {court}</h1>
+                        
+                        <table style='font-size: 18px; margin: 0 auto;'>
+                            <thead>
+                                <tr style='padding: 7px 15px;'>
+                                    """
+    if isWeekend(current_date):
+        for time in possibletimesweekend[1:halflengthpt]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 7px 15px;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[1:halflengthpt]:
+                if courts_dict[court][time]["username"]:
+                    if len(courts_dict[court][time]["username"]) > 8:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 18px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 7px 15px;'>"""
+        for time in possibletimesweekend[halflengthpt:]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 7px 15px;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[halflengthpt:]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 8:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+            </div>"""
+    else:
+        for time in possibletimes[1:halflengthpt]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+        court_msg += "</tr><tr>"
+        for time in courts_dict[court]:
+            if time in possibletimes[1:halflengthpt]:
+                if courts_dict[court][time]["username"]:
+                    if len(courts_dict[court][time]["username"]) > 8:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 18px; margin: 0 auto;'>
+                    <thead>
+                        <tr>"""
+        for time in possibletimes[halflengthpt:]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+        court_msg += "</tr><tr>"
+        for time in courts_dict[court]:
+            if time in possibletimes[halflengthpt:]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 8:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+            </div>"""
+    return court_msg
+
+def getAllAdminsEmails():
+    con = psycopg2.connect(os.environ.get('POSTGRE_URI')) # make a system variable on AWS Lambda
+    cur = con.cursor()
+
+    cur.execute("SELECT email FROM users WHERE type = 'admin'")
+    admins = cur.fetchall()
+
+    return admins
 
 def lambda_handler(event, context):
+    # Get data to send to admin
     # get current date as string ("%Y"-"%m"-"%-d")
     current_date = datetime.now()
     current_date_str = current_date.strftime("%Y-%m-%d")
-
+    halflengthpt = 0
     if isWeekend(current_date):
         courts_dict = getTableData(current_date_str, courts, possibletimes, possibletimesweekend, True)
         halflengthpt = int(len(possibletimesweekend) / 2) + 1
     else: # today is not a weekend day
         courts_dict = getTableData(current_date_str, courts, possibletimes, possibletimesweekend, False) 
         halflengthpt = int(len(possibletimes) / 2) + 1
+    courts_msg_list = []
+
+    # Get HTML to be on the email
+    for court in courts_dict:
+        court_msg = getAdminEmailHTML(court, current_date, halflengthpt, courts_dict)
+        courts_msg_list.append(court_msg)
+    courts_msg = ""
+    for message in courts_msg_list:
+        courts_msg += message
+
     
-    # From today.html, form a string to mark the html to be sent on msg
+    # Get info for email
+
+    # get the email for all admins
+    admins_emails = getAllAdminsEmails()
 
     MAIL_ADDRESS = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_TO = os.environ.get('MAIL_TO')
+    MAIL_TO = []
+    for admin in admins_emails:
+        MAIL_TO.append(admin[0])
 
     msg = EmailMessage()
-    msg['Subject'] = 'Your dog of the day!'
+    current_date_str_tosend = current_date.strftime("%m-%d-%Y")
+    msg['Subject'] = f'Scheduling - Bookings for {current_date_str_tosend}'
     msg['From'] = MAIL_ADDRESS
-    msg['To'] = [MAIL_TO]
+    msg['To'] = MAIL_TO
 
-    msg.set_content(f"Have a great day :)!\n{dog_image_url}")
-    msg.add_alternative(f'Here is a dog image to cheer you up<br><br><img src="{dog_image_url}" width="300px"><br><br>Have a great day :)', subtype='html')
+    msg.add_header('Content-Type','text/html')
+    msg.set_payload(courts_msg)
+    
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(MAIL_ADDRESS, MAIL_PASSWORD)
-        smtp.send_message(msg)
-
-
+        smtp.send_message(msg) 
 
 
 # {% for court in cd %}
@@ -244,4 +355,5 @@ def lambda_handler(event, context):
 #         }
 #     }
 # </style>
+
 
