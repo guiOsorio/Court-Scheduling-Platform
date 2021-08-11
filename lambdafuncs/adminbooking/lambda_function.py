@@ -11,6 +11,13 @@ import datetime as dt
 from datetime import datetime
 from email.message import EmailMessage
 
+# Store program's name
+appname = "Scheduling"
+path_to_site = "#"
+
+# Store links to show at the end of emails
+link_to_site = f'<p>Visit us at <a href="{path_to_site}">{appname}.com</a></p>'
+link_to_this_page = f'<p>Visit this page at <a href="{path_to_site}/today">{appname}.com</a></p>'
 
 # Function to return a list of strings to represent the time options for a certain club
 def getRegPossibleTimes(opening, close):
@@ -127,7 +134,7 @@ def getTableData(current_date_str, courts, possibletimes, possibletimesweekend, 
     return courts_dict
 
 # From today.html, form a string to mark the html to be sent on msg
-def getAdminEmailHTML(court, current_date, halflengthpt, courts_dict):
+def getAdminEmailHTML(court, current_date, thirdlengthpt, courts_dict):
     court_msg = f"""<div class='court-times' style='border: 1px solid #777; text-align: center; margin-bottom: 20px; overflow-x: auto;'>
                         <h1>Court {court}</h1>
                         
@@ -136,15 +143,15 @@ def getAdminEmailHTML(court, current_date, halflengthpt, courts_dict):
                                 <tr style='padding: 7px 15px;'>
                                     """
     if isWeekend(current_date):
-        for time in possibletimesweekend[1:halflengthpt]:
+        for time in possibletimesweekend[1:thirdlengthpt]:
             if time != 'Choose a time':
-                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+                court_msg += f"<th style='padding: 0 20px;'>{time}</th>"
         court_msg += "</tr><tr style='padding: 7px 15px;'>"
         for time in courts_dict[court]:
-            if time in possibletimesweekend[1:halflengthpt]:
+            if time in possibletimesweekend[1:thirdlengthpt]:
                 if courts_dict[court][time]["username"]:
-                    if len(courts_dict[court][time]["username"]) > 8:
-                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    if len(courts_dict[court][time]["username"]) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
                     else:
                         court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
                 else:
@@ -155,15 +162,34 @@ def getAdminEmailHTML(court, current_date, halflengthpt, courts_dict):
                 <table style='font-size: 18px; margin: 0 auto;'>
                     <thead>
                         <tr style='padding: 7px 15px;'>"""
-        for time in possibletimesweekend[halflengthpt:]:
+        for time in possibletimesweekend[thirdlengthpt:thirdlengthpt*2-1]:
             if time != 'Choose a time':
-                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+                court_msg += f"<th style='padding: 0 20px;'>{time}</th>"
         court_msg += "</tr><tr style='padding: 7px 15px;'>"
         for time in courts_dict[court]:
-            if time in possibletimesweekend[halflengthpt:]:
+            if time in possibletimesweekend[thirdlengthpt:thirdlengthpt*2-1]:
                 if courts_dict[court][time]['username']:
-                    if len(courts_dict[court][time]['username']) > 8:
-                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """<table style='font-size: 18px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 7px 15px;'>"""
+        for time in possibletimesweekend[thirdlengthpt*2-1:thirdlengthpt*3]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 20px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 7px 15px;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[thirdlengthpt*2-1:thirdlengthpt*3]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
                     else:
                         court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
                 else:
@@ -173,15 +199,15 @@ def getAdminEmailHTML(court, current_date, halflengthpt, courts_dict):
                 </table>
             </div>"""
     else:
-        for time in possibletimes[1:halflengthpt]:
+        for time in possibletimes[1:thirdlengthpt]:
             if time != 'Choose a time':
-                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+                court_msg += f"<th style='padding: 0 20px;'>{time}</th>"
         court_msg += "</tr><tr>"
         for time in courts_dict[court]:
-            if time in possibletimes[1:halflengthpt]:
+            if time in possibletimes[1:thirdlengthpt]:
                 if courts_dict[court][time]["username"]:
-                    if len(courts_dict[court][time]["username"]) > 8:
-                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    if len(courts_dict[court][time]["username"]) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
                     else:
                         court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
                 else:
@@ -192,15 +218,251 @@ def getAdminEmailHTML(court, current_date, halflengthpt, courts_dict):
                 <table style='font-size: 18px; margin: 0 auto;'>
                     <thead>
                         <tr>"""
-        for time in possibletimes[halflengthpt:]:
+        for time in possibletimes[thirdlengthpt:thirdlengthpt*2-1]:
             if time != 'Choose a time':
-                court_msg += f"<th style='padding-right: 20px;'>{time}</th>"
+                court_msg += f"<th style='padding: 0 20px;'>{time}</th>"
         court_msg += "</tr><tr>"
         for time in courts_dict[court]:
-            if time in possibletimes[halflengthpt:]:
+            if time in possibletimes[thirdlengthpt:thirdlengthpt*2-1]:
                 if courts_dict[court][time]['username']:
-                    if len(courts_dict[court][time]['username']) > 8:
-                        court_msg += f"<td>{courts_dict[court][time]['username'][:7]}..</td>"
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """<table style='font-size: 18px; margin: 0 auto;'>
+                    <thead>
+                        <tr>"""
+        for time in possibletimes[thirdlengthpt*2-1:thirdlengthpt*3]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 20px;'>{time}</th>"
+        court_msg += "</tr><tr>"
+        for time in courts_dict[court]:
+            if time in possibletimes[thirdlengthpt*2-1:thirdlengthpt*3]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+            </div>"""
+    return court_msg
+
+
+def getResponsiveAdminEmailHTML(court, current_date, fifthlengthpt, courts_dict):
+    court_msg = f"""<div class='court-times' style='border: 1px solid #777; text-align: center; margin-bottom: 20px; overflow-x: auto;'>
+                        <h1>Court {court}</h1>
+                        
+                        <table style='font-size: 10px; margin: 0 auto;'>
+                            <thead>
+                                <tr style='padding: 4px 10px;'>
+                                    """
+    if isWeekend(current_date):
+        for time in possibletimesweekend[1:fifthlengthpt]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[1:fifthlengthpt+1]:
+                if courts_dict[court][time]["username"]:
+                    if len(courts_dict[court][time]["username"]) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimesweekend[fifthlengthpt+1:fifthlengthpt*2]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[fifthlengthpt+1:fifthlengthpt*2]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimesweekend[fifthlengthpt*2:fifthlengthpt*3-1]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[fifthlengthpt*2:fifthlengthpt*3-1]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimesweekend[fifthlengthpt*3-1:fifthlengthpt*4-2]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[fifthlengthpt*3-1:fifthlengthpt*4-2]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimesweekend[fifthlengthpt*4-2:fifthlengthpt*5]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimesweekend[fifthlengthpt*4-2:fifthlengthpt*5]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+            </div>"""
+    else:
+        for time in possibletimes[1:fifthlengthpt+1]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimes[1:fifthlengthpt+1]:
+                if courts_dict[court][time]["username"]:
+                    if len(courts_dict[court][time]["username"]) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimes[fifthlengthpt+1:fifthlengthpt*2]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimes[fifthlengthpt+1:fifthlengthpt*2]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimes[fifthlengthpt*2:fifthlengthpt*3-1]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimes[fifthlengthpt*2:fifthlengthpt*3-1]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimes[fifthlengthpt*3-1:fifthlengthpt*4-2]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimes[fifthlengthpt*3-1:fifthlengthpt*4-2]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
+                    else:
+                        court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
+                else:
+                    court_msg += "<td> - </td>"
+        court_msg += """</tr>
+                    </thead>
+                </table>"""
+        court_msg += """</tr>
+                    </thead>
+                </table>
+                <table style='font-size: 10px; margin: 0 auto;'>
+                    <thead>
+                        <tr style='padding: 4px 10px;'>"""
+        for time in possibletimes[fifthlengthpt*4-2:fifthlengthpt*5]:
+            if time != 'Choose a time':
+                court_msg += f"<th style='padding: 0 10px;'>{time}</th>"
+        court_msg += "</tr><tr style='padding: 4px 10px; text-align: center;'>"
+        for time in courts_dict[court]:
+            if time in possibletimes[fifthlengthpt*4-2:fifthlengthpt*5]:
+                if courts_dict[court][time]['username']:
+                    if len(courts_dict[court][time]['username']) > 6:
+                        court_msg += f"<td>{courts_dict[court][time]['username'][:5]}..</td>"
                     else:
                         court_msg += f"<td>{courts_dict[court][time]['username']}..</td>"
                 else:
@@ -225,22 +487,27 @@ def lambda_handler(event, context):
     # get current date as string ("%Y"-"%m"-"%-d")
     current_date = datetime.now()
     current_date_str = current_date.strftime("%Y-%m-%d")
-    halflengthpt = 0
+    thirdlengthpt = 0
+    fifthlengthpt = 0
     if isWeekend(current_date):
         courts_dict = getTableData(current_date_str, courts, possibletimes, possibletimesweekend, True)
-        halflengthpt = int(len(possibletimesweekend) / 2) + 1
+        thirdlengthpt = int(len(possibletimesweekend) / 3) + 1
+        fifthlengthpt = int(len(possibletimesweekend) / 4) + 1
     else: # today is not a weekend day
         courts_dict = getTableData(current_date_str, courts, possibletimes, possibletimesweekend, False) 
-        halflengthpt = int(len(possibletimes) / 2) + 1
+        thirdlengthpt = int(len(possibletimes) / 3) + 1
+        fifthlengthpt = int(len(possibletimes) / 5) + 1
+
     courts_msg_list = []
 
     # Get HTML to be on the email
     for court in courts_dict:
-        court_msg = getAdminEmailHTML(court, current_date, halflengthpt, courts_dict)
+        court_msg = getAdminEmailHTML(court, current_date, thirdlengthpt, courts_dict)
         courts_msg_list.append(court_msg)
     courts_msg = ""
     for message in courts_msg_list:
         courts_msg += message
+    courts_msg += link_to_site + link_to_this_page
 
     
     # Get info for email
@@ -256,7 +523,7 @@ def lambda_handler(event, context):
 
     msg = EmailMessage()
     current_date_str_tosend = current_date.strftime("%m-%d-%Y")
-    msg['Subject'] = f'Scheduling - Bookings for {current_date_str_tosend}'
+    msg['Subject'] = f'{appname} - Bookings for {current_date_str_tosend}'
     msg['From'] = MAIL_ADDRESS
     msg['To'] = MAIL_TO
 
@@ -267,6 +534,29 @@ def lambda_handler(event, context):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(MAIL_ADDRESS, MAIL_PASSWORD)
         smtp.send_message(msg) 
+
+    courts_msg_list_responsive = []
+
+    for court in courts_dict:
+        court_msg_responsive = getResponsiveAdminEmailHTML(court, current_date, fifthlengthpt, courts_dict)
+        courts_msg_list_responsive.append(court_msg_responsive)
+    courts_msg_responsive = ""
+    for message in courts_msg_list_responsive:
+        courts_msg_responsive += message
+    courts_msg_responsive += link_to_site + link_to_this_page
+    
+
+    msg_responsive = EmailMessage()
+    msg_responsive['Subject'] = f'{appname} - Bookings for {current_date_str_tosend} (MOBILE)'
+    msg_responsive['From'] = MAIL_ADDRESS
+    msg_responsive['To'] = MAIL_TO
+
+    msg_responsive.add_header('Content-Type','text/html')
+    msg_responsive.set_payload(courts_msg_responsive)
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        smtp.login(MAIL_ADDRESS, MAIL_PASSWORD)
+        smtp.send_message(msg_responsive) 
 
 
 # {% for court in cd %}
