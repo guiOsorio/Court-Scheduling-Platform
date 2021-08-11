@@ -14,10 +14,13 @@ def lambda_handler(event, context):
     cur = con.cursor()
 
     # get current date as string ("%Y"-"%m"-"%-d")
-    current_date = datetime.now()
-    current_date_str = current_date.strftime("%Y-%m-%d")
+    curr_date = datetime.now()
+    curr_date_str = curr_date.strftime("%Y-%m-%d")
     # get current hour of the day as string (if hour is < 10, add a zero in the beginning, else just get the hour)
-    # get bookings where date = current_date and time like current_hour%
+    curr_hour = curr_date.strftime("%H")
+    # get bookings where date = current_date and time like current_hour
+    cur.execute("SELECT booking_id FROM bookings WHERE date = %(curr_date)s AND time = %(curr_hour)s", {"curr_date": curr_date_str, "curr_hour": curr_hour})
+    bookings = cur.fetchall()
     # get users associated with the bookings
     # for every user associated with a booking, send its specific info (only send the user the info for their own booking) 
 

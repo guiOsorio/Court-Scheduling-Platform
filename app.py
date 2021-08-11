@@ -617,9 +617,10 @@ if __name__ == '__main__':
 
 # Scheduler - AWS Lambda
     # if a user has a booking in the next hour, send him an email
+    # add link to website at the end of each email
+    # add a trigger to Lambda functions (every morning at 6am EST for admin and every hour for user)
+    # set up website to save a request if a user is not logged in and go to that page once user logs in
 # Pre-Deployment
-    # session not ending properly when I restart flask
-    # test entire app
     # styling (with SASS and JS where necessary + Bootstrap)
         # choose a nice color schema
         # choose a nice font
@@ -634,13 +635,13 @@ if __name__ == '__main__':
         # login (login.html)
             # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
             # have login form be on the center of the page and with a different background
-        # /today (AWS Lambda + page)
-            # if there are bookings in the next hour, send admin an email with all the bookings (send table with all possible booking hours and username of person who booked it or '-')
-            # design tables to be responsive and look nice
+        # make forms buttons and inputs look nice
+        # flash styling
         # add footer to the layout
         # JS
             # disable unavailable booking hours when user is booking a court
             # show current date and time (hours and minutes) to update every minute on top of book a court page
+            # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
     # have a detailed Readme
 # Deployment
     # deploy and show to Luis

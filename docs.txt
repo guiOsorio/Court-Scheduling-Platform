@@ -57,7 +57,7 @@
             # change date format to '%m-%d-%Y' when sending/showing to user  - https://www.youtube.com/watch?v=eirjjyP2qcQ - datetime
             # improve email messages (include appname variable on titles)
         # Account page
-            # show all useful account info (username, email, account type)  ########################
+            # show all useful account info (username, email, account type)
             # have option to change email
             # have user be able to change password by email
         # change schema to drop NOT NULL constraint from people
@@ -67,10 +67,12 @@
             (when admin books a day, set people to nothing)
         # Scheduler - AWS Lambda
             # if there are bookings in the next hour, send admin an email with all the bookings (send table with all possible booking hours and username of person who booked it or '-')
-            # if a user has a booking in the next hour, send him an email
+            # add mobile version of admin email (send a new email)
+            # if a user has a booking in the next hour, send him an email   ########################
+            # add link to website at the end of each email and a link to the /today page on email to admin
+            # add a trigger to Lambda functions (every morning at 6am EST for admin and every hour for user)
+            # set up website to save a request if a user is not logged in and go to that page once user logs in
         # Pre-Deployment
-            # session not ending properly when I restart flask
-            # test entire app
             # styling (with SASS and JS where necessary + Bootstrap)
                 # choose a nice color schema
                 # choose a nice font
