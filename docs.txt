@@ -74,6 +74,7 @@
             # set up website to save a request if a user is not logged in and go to that page once user logs in
         # Pre-Deployment
             # styling (with SASS and JS where necessary + Bootstrap)
+                # download Bootstrap locally
                 # choose a nice color schema
                 # choose a nice font
                 # (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)

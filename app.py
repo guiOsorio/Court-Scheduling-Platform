@@ -616,11 +616,9 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Scheduler - AWS Lambda
-    # if a user has a booking in the next hour, send him an email
-    # add link to website at the end of each email
-    # add a trigger to Lambda functions (every morning at 6am EST for admin and every hour for user)
     # set up website to save a request if a user is not logged in and go to that page once user logs in
 # Pre-Deployment
+    # download Bootstrap locally
     # styling (with SASS and JS where necessary + Bootstrap)
         # choose a nice color schema
         # choose a nice font
