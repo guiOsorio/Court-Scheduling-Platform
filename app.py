@@ -619,7 +619,6 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Pre-Deployment
-    # download Bootstrap locally
     # styling (with SASS and JS where necessary + Bootstrap)
         # choose a nice color schema
         # choose a nice font
