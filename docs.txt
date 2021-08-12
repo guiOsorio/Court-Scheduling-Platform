@@ -73,9 +73,9 @@
             # add a trigger to Lambda functions (every morning at 6am EST for admin and every hour for user)
         # set up website to save a request if a user is not logged in and go to that page once user logs in
         # Pre-Deployment
-            # styling (with SASS and JS where necessary + Bootstrap)   ########################
+            # styling (with SASS and JS where necessary + Bootstrap)
                 # download Bootstrap locally
-                # choose a nice color schema
+                # choose a nice color schema           ########################
                 # choose a nice font
                 # (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
                 # navbar is transparent (same color as page's background)
@@ -96,6 +96,8 @@
                     # show current date and time (hours and minutes) to update every minute on top of book a court page
                     # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
             # have a detailed Readme
+            # delete Bootstrap locally
+            # move psycopg2 file (from lambda functions) to outside the app folder
         # Deployment
             # deploy and show to Luis
     # version 2.0 - goal is to be a platform where users can book a court for different clubs

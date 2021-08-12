@@ -25,12 +25,12 @@ def lambda_handler(event, context):
     curr_date_str = curr_date.strftime("%Y-%m-%d")
     # Get current hour of the day as string (if hour is < 10, add a zero in the beginning, else just get the hour)
     curr_hour = curr_date.strftime("%H")
-    next_hour = int(curr_hour) + 1
+    next_hour = int(curr_hour) - 6
     next_hour_str = str(next_hour)
     if len(next_hour_str) == 1:
         next_hour_str = "0" + next_hour_str
-    # Get bookings where date = current_date and time like current_hour
-    cur.execute("SELECT booking_id FROM bookings WHERE date = %(curr_date)s AND time LIKE %(curr_hour)s", {"curr_date": curr_date_str, "curr_hour": f'{next_hour_str}%'})
+    # Get bookings where date = current_date and time like next_hour
+    cur.execute("SELECT booking_id FROM bookings WHERE date = %(curr_date)s AND time LIKE %(curr_hour)s", {"curr_date": curr_date_str, "next_hour": f'{next_hour_str}%'})
     bookings_qresult = cur.fetchall()
     bookings = []
     # Populate bookings list to have the booking ids of all bookings in the next hour
