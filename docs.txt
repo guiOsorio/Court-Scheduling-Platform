@@ -68,12 +68,12 @@
         # Scheduler - AWS Lambda
             # if there are bookings in the next hour, send admin an email with all the bookings (send table with all possible booking hours and username of person who booked it or '-')
             # add mobile version of admin email (send a new email)
-            # if a user has a booking in the next hour, send him an email   ########################
+            # if a user has a booking in the next hour, send him an email
             # add link to website at the end of each email and a link to the /today page on email to admin
             # add a trigger to Lambda functions (every morning at 6am EST for admin and every hour for user)
-            # set up website to save a request if a user is not logged in and go to that page once user logs in
+        # set up website to save a request if a user is not logged in and go to that page once user logs in
         # Pre-Deployment
-            # styling (with SASS and JS where necessary + Bootstrap)
+            # styling (with SASS and JS where necessary + Bootstrap)   ########################
                 # download Bootstrap locally
                 # choose a nice color schema
                 # choose a nice font

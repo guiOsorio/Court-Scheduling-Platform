@@ -121,9 +121,10 @@ def login():
 
         username = request.form.get("username")
         password = request.form.get("password")
+        next_url = request.form.get("next")
 
         if not validateLogin(username, password):
-            return redirect("/login")
+            return redirect(request.referrer)
         
         id = createUser(username)
 
@@ -138,6 +139,8 @@ def login():
         else:
             session["isAdmin"] = False
 
+        if next_url:
+            return redirect(next_url)
         return redirect("/")
 
     return render_template("login.html")
@@ -615,8 +618,6 @@ if __name__ == '__main__':
 # NEXT TODOS
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Scheduler - AWS Lambda
-    # set up website to save a request if a user is not logged in and go to that page once user logs in
 # Pre-Deployment
     # download Bootstrap locally
     # styling (with SASS and JS where necessary + Bootstrap)

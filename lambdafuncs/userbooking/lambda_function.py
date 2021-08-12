@@ -17,7 +17,7 @@ link_to_site = f'<p>Visit us at <a href="{path_to_site}">{appname}.com</a></p>'
 
 def lambda_handler(event, context):
     # Connect to database
-    con = psycopg2.connect('postgres://sdekffai:EQWNHQ8WqiTemvmwSEfhewB9Gq6ACsfE@kashin.db.elephantsql.com/sdekffai')
+    con = psycopg2.connect(os.environ.get(POSTGRE_URI))
     cur = con.cursor()
 
     # Get current date as string ("%Y"-"%m"-"%-d")

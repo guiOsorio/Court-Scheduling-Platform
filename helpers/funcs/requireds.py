@@ -1,4 +1,4 @@
-from flask import flash, redirect, session
+from flask import flash, redirect, session, request, url_for
 from functools import wraps
 
 def login_required(f):
@@ -11,7 +11,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
             flash("Login required", "danger")
-            return redirect("/login")
+            return redirect((url_for("login", next=request.url)))
         return f(*args, **kwargs)
     return decorated_function
 
