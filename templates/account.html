@@ -5,14 +5,12 @@
     <h1>Manage your account</h1>
 
     <h3>Account Info</h3>
-
     <p>Username: <strong>{{ userInfo["uname"] }}</strong></p>
     <p>Email address: <strong>{{ userInfo["eaddress"] }}</strong></p>
     <p>Account type: <strong>{{ userInfo["type"] }}</strong></p>
 
-    <h3>Change password</h3>
-
     <form action="/api/changepassword" method="POST">
+        <h3>Change password</h3>
         <label for="password">Password</label>
         <input type="password" name="password" id="password">
 
@@ -25,9 +23,8 @@
         <input type="submit" id="changepassword" name="changepassword" value="Change password">
     </form>
 
-    <h3>Change email</h3>
-
-    <form action="/api/changeemail" method="POST">
+    <form action="/api/changeemail" method="POST" autocomplete="off">
+        <h3>Change email</h3>
         <label for="password">Password</label>
         <input type="password" name="password" id="password">
 
@@ -37,9 +34,8 @@
         <input type="submit" id="changeemail" name="changeemail" value="Change email">
     </form>
 
-    <h3>Delete account</h3>
-
     <form action="/api/deleteaccount" method="POST">
+        <h3>Delete account</h3>
         <label for="password">Password</label>
         <input type="password" name="password" id="password">
 

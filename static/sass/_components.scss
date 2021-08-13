@@ -1,4 +1,5 @@
 .form {
+    margin-top: 5rem;
     display: flex;
 
     &__standard {
@@ -6,8 +7,9 @@
         justify-content: center;
 
         &__title {
-            text-align: center;
-            margin-bottom: 2rem;
+            transform: translate(-25%, 30%);
+            font-size: 3.5rem;
+            color: $color-primary-light;
         }
     }
 
@@ -21,12 +23,14 @@
 
         & input, select {
             width: 15rem;
+            border-color: $color-secondary-light;
         }
     }
 
     &-btn {
         margin-top: 1.5rem;
         text-align: center;
+        transform: translateX(10%);
 
         & button {
             padding: .5rem 1.1rem;
@@ -36,4 +40,8 @@
             font-weight: bold;
         }
     }
+}
+
+input:focus, select:focus {
+    outline-color: $color-primary-light;
 }

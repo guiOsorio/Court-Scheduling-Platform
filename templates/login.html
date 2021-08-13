@@ -2,18 +2,25 @@
 
 {% block content %}
 
-    <h1>LOGIN</h1>
-
-    <form action="/login" method="POST">
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username">
-
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-
-        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}"/>
-
-        <button>Login</button>
-    </form>
+    <div class="form form__standard">
+        <h1 class="form__standard__title">LOGIN</h1>
+        <form action="/login" method="POST" autocomplete="off">
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username">
+            </div>
+                
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            
+            <input type="hidden" name="next" value="{{ request.args.get('next', '') }}"/>
+            
+            <div class="form-btn">
+                <button>Login</button>
+            </div>
+        </form>
+    </div>
 
 {% endblock %}

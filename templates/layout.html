@@ -29,7 +29,7 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-md navbar-light bg-light border nav">
+    <nav class="navbar navbar-expand-md navbar-light bg-light nav">
         <a class="navbar-brand nav__title" href="/">SCHEDULING APP</a>
         <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
             <span class="navbar-toggler-icon"></span>
@@ -56,6 +56,7 @@
             {% endif %}
         </div>
     </nav>
+    <div class="navbardiv"></div>
 
     <!-- FLASH MESSAGES -->
     {% for category, message in get_flashed_messages(with_categories=true) %}

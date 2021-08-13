@@ -2,10 +2,9 @@
 
 {% block content %}
 
-    <h1 class="form__standard__title">BOOKING</h1>
-
     <div class="form form__standard">
-        <form action="/makebooking" method="POST">
+        <h1 class="form__standard__title">BOOKING</h1>
+        <form action="/makebooking" method="POST" autocomplete="off">
             {{ form.csrf_token }}
             
             <div class="form-field">

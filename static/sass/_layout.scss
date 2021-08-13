@@ -10,6 +10,13 @@
     }
 }
 
+.navbardiv {
+    height: 1px;
+    background-color: $color-primary-light;
+    width: 98%;
+    margin: 0 auto;
+}
+
 .nav {
     background-color: $color-secondary-light !important;
 
