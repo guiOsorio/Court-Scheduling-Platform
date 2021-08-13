@@ -29,10 +29,10 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret"
 
 # If schema already exists, move on with the program
-try:
-    createSchema()
-except psycopg2.errors.DuplicateTable:
-    pass
+# try:
+#     createSchema()
+# except psycopg2.errors.DuplicateTable:
+#     pass
 
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
@@ -619,14 +619,10 @@ if __name__ == '__main__':
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Pre-Deployment
-    # styling (with SASS and JS where necessary + Bootstrap)
-        # choose a nice color schema
-        # choose a nice font
-        # (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
-        # navbar is transparent (same color as page's background)
+    # styling (with SASS and JS where necessary + Bootstrap) (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
         # homepage (index.html)
             # have 2 nice Dan photos or from Unsplash on right half of screen and big title located a bit below images on the left side of the screen, 
-            #   as well as a smaller subtitle under the title
+                # as well as a smaller subtitle under the title
             # images on right side of screen grow bigger on hover and go on top of each other like on the ACM website
             # leave some space after main section for user to see the page continues
             # have another section with a rectangle with text on the center of it
@@ -634,13 +630,13 @@ if __name__ == '__main__':
             # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
             # have login form be on the center of the page and with a different background
         # make forms buttons and inputs look nice
-        # flash styling
         # add footer to the layout
         # JS
             # disable unavailable booking hours when user is booking a court
             # show current date and time (hours and minutes) to update every minute on top of book a court page
             # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
     # have a detailed Readme
+    # delete Bootstrap locally
 # Deployment
     # deploy and show to Luis
 

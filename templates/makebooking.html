@@ -2,24 +2,36 @@
 
 {% block content %}
 
-    <h1>BOOKING</h1>
+    <h1 class="form__standard__title">BOOKING</h1>
 
-    <form action="/makebooking" method="POST" class="booking-form">
-        {{ form.csrf_token }}
-
-        {{ form.people.label }}
-        {{ form.people }}
-
-        {{ form.court.label }}
-        {{ form.court }}
-
-        {{ form.date.label }}
-        {{ form.date }}
-
-        {{ form.time.label }}
-        {{ form.time }}
-
-        <button>Submit</button>
-    </form>
+    <div class="form form__standard">
+        <form action="/makebooking" method="POST">
+            {{ form.csrf_token }}
+            
+            <div class="form-field">
+                {{ form.people.label }}
+                {{ form.people }}
+            </div>
+            
+            <div class="form-field">
+                {{ form.court.label }}
+                {{ form.court }}
+            </div>
+            
+            <div class="form-field">
+                {{ form.date.label }}
+                {{ form.date }}
+            </div>
+            
+            <div class="form-field">
+                {{ form.time.label }}
+                {{ form.time }}
+            </div>
+            
+            <div class="form-btn">
+                <button>Submit</button>
+            </div>
+        </form>
+    </div>
 
 {% endblock %}

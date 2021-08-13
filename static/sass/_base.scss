@@ -13,6 +13,15 @@ html {
     box-sizing: border-box;
 }
 
+body {
+    background-color: $color-secondary-light !important;
+    font-family: 'Nixie One', 'Comfortaa', cursive, sans-serif;
+}
+
 .content {
     padding: 0 2rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Comfortaa', cursive, sans-serif;
 }

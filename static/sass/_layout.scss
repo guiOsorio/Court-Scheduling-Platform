@@ -1,18 +1,29 @@
+.ownalert {
+    &-success {
+        background-color: $color-success;
+        color: white;
+    }
+
+    &-danger {
+        background-color: $color-danger;
+        color: white;
+    }
+}
+
 .nav {
-    background-color: $color-primary !important;
-    margin-bottom: 1rem;
+    background-color: $color-secondary-light !important;
 
     &__title {
-        color: $color-white !important;
+        color: $color-primary !important;
         font-weight: bold;
     }
 
     &-link {
-        color: $color-black !important;
+        color: $color-primary !important;
         font-weight: bold;
 
         &:hover {
-            color: $color-grey !important;
+            color: $color-primary-light !important;
         }
     }
 }

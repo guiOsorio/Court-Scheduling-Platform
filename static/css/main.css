@@ -13,39 +13,74 @@ html {
   box-sizing: border-box;
 }
 
+body {
+  background-color: #EAE7DC !important;
+  font-family: "Nixie One", "Comfortaa", cursive, sans-serif;
+}
+
 .content {
   padding: 0 2rem;
 }
 
-.booking-form {
-  width: 40%;
-  margin: 0 auto;
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Comfortaa", cursive, sans-serif;
+}
+
+.form {
   display: flex;
-  flex-direction: column;
+}
+.form__standard {
+  align-items: center;
   justify-content: center;
 }
-.booking-form label {
-  padding-top: 2rem;
+.form__standard__title {
+  text-align: center;
+  margin-bottom: 2rem;
 }
-.booking-form button {
-  width: 50%;
-  margin: 2rem auto;
+.form-field {
+  padding: 0.7rem 0;
+}
+.form-field label {
+  width: 15rem;
+  text-align: center;
+}
+.form-field input, .form-field select {
+  width: 15rem;
+}
+.form-btn {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+.form-btn button {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  background-color: #E85A4F;
+  color: #EAE7DC;
+  font-weight: bold;
+}
+
+.ownalert-success {
+  background-color: #399d61;
+  color: white;
+}
+.ownalert-danger {
+  background-color: #9d3939;
+  color: white;
 }
 
 .nav {
-  background-color: #0F70A9 !important;
-  margin-bottom: 1rem;
+  background-color: #EAE7DC !important;
 }
 .nav__title {
-  color: #FFF !important;
+  color: #E85A4F !important;
   font-weight: bold;
 }
 .nav-link {
-  color: #000 !important;
+  color: #E85A4F !important;
   font-weight: bold;
 }
 .nav-link:hover {
-  color: #999 !important;
+  color: #E98074 !important;
 }
 
 /*# sourceMappingURL=main.css.map */

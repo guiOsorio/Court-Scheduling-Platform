@@ -2,22 +2,34 @@
 
 {% block content %}
 
-    <h1>REGISTER</h1>
+    <h1 class="form__standard__title">REGISTER</h1>
 
-    <form action="/api/createaccount" method="POST">
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username">
-
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email">
-
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-
-        <label for="pswdconf">Password confirmation</label>
-        <input type="password" name="pswdconf" id="pswdconf">
-
-        <button>Register</button>
-    </form>
+    <div class="form form__standard">
+        <form action="/api/createaccount" method="POST">
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username">
+            </div>
+            
+            <div class="form-field">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email">
+            </div>
+            
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            
+            <div class="form-field">    
+                <label for="pswdconf">Confirmation</label>
+                <input type="password" name="pswdconf" id="pswdconf">
+            </div>
+            
+            <div class="form-btn">
+                <button>Register</button>
+            </div>
+        </form>
+    </div>
 
 {% endblock %}

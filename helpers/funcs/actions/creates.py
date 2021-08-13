@@ -7,7 +7,7 @@ from helpers.funcs.others import showDateToUserFormat
 from helpers.funcs.actions.gets import getNextTime
 from helpers.variables.lists import possibletimes, possibletimesweekend
 
-con = psycopg2.connect(POSTGRE_URI)   #########
+# con = psycopg2.connect(POSTGRE_URI)   #########
 
 def createSchema():
     con = psycopg2.connect(POSTGRE_URI)
