@@ -13,7 +13,7 @@ from helpers.funcs.actions.creates import createSchema, createIndex, createBooki
 from helpers.funcs.actions.deletes import deleteBooking, deleteUserDayBookings, deleteAllUserBookings, deleteAllDayBookings, deleteUserAccount
 from helpers.funcs.actions.gets import getDayBookingsCount, getUserType, getAllUsernames, getCurrDate, getCurrTime, getUpcomingUserBookings, getUserBookingsData, \
     getBookingsData, getDayBookingsCount, getAllBookingsCount, getUserEmail, getBookingInfo, getUserId, getBookingId, getUsername, getUserAccountData, \
-    getTableData
+    getTableData, getAllBookedHoursInfo
 from helpers.funcs.actions.updates import updateUserPassword, updateUserEmail
 from helpers.funcs.others import isDatePast, isWeekend, passwordEqualsHash, doesBookingIdExist, showDateToUserFormat
 from helpers.funcs.validations import validateBooking, validateLogin, validateEmail, validateRegistration, validateIndex, validateDate, validatePassword
@@ -108,8 +108,10 @@ def makebooking():
             sendEmail(title, text, recipient)
 
             return redirect("/makebooking")
+    
+    booked_hours_info = getAllBookedHoursInfo()
 
-    return render_template("makebooking.html", form=form)
+    return render_template("makebooking.html", form=form, bhs=booked_hours_info, pts=possibletimes)
 
 
 
@@ -632,8 +634,7 @@ if __name__ == '__main__':
         # make forms buttons and inputs look nice
         # add footer to the layout
         # JS
-            # disable unavailable booking hours when user is booking a court
-            # show current date and time (hours and minutes) to update every minute on top of book a court page
+            # disable unavailable booking hours when user is booking a court (already booked hours or weekend not operational hours)
             # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
     # have a detailed Readme
     # delete Bootstrap locally

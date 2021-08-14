@@ -358,3 +358,23 @@ def getTableData(current_date_str, courts, possibletimes, possibletimesweekend, 
         con.close()
     
     return courts_dict
+
+
+def getAllBookedHoursInfo():
+    con = psycopg2.connect(POSTGRE_URI)
+    cur = con.cursor()
+
+    curr_date = getCurrDate()
+
+    cur.execute("SELECT court, date, time FROM bookings WHERE date >= %(curr_date)s", {"curr_date": curr_date})
+    booked_hours_info_qresult = cur.fetchall()
+    booked_hours_info = []
+    for info in booked_hours_info_qresult:
+        booking_info = {"court": None, "date": None, "time": None}
+        booking_info["court"] = info[0]
+        date = info[1].strftime("%Y-%m-%d")
+        booking_info["date"] = date
+        booking_info["time"] = info[2]
+        booked_hours_info.append(booking_info)
+
+    return booked_hours_info # list of lists

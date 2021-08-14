@@ -14,17 +14,23 @@
             
             <div class="form-field">
                 {{ form.court.label }}
-                {{ form.court }}
+                {{ form.court(**{"onchange": "changeSelected()"}) }}
             </div>
             
             <div class="form-field">
                 {{ form.date.label }}
-                {{ form.date }}
+                {{ form.date(**{"onchange": "changeSelected()"}) }}
             </div>
             
             <div class="form-field">
-                {{ form.time.label }}
-                {{ form.time }}
+                <label for="time">Time</label>
+                <select name="time" id="time" onchange="changeSelected()">
+                    {% for time in pts %}
+                        <option class="time-option" value="{{time}}">{{time}}</option>
+                    {% endfor %}
+                </select>
+                <!-- {{ form.time.label }}
+                {{ form.time }} -->
             </div>
             
             <div class="form-btn">
@@ -32,5 +38,33 @@
             </div>
         </form>
     </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    // Transform python variable to json
+    let bhs = {{ bhs | tojson }}
+
+    // Get all relevant fields
+    let court_field = document.getElementById("court")
+    let date_field = document.getElementById("date")
+    let time_option = document.querySelectorAll("time-option")
+
+    // Get selected values of releveant fields
+    let selectedCourtValue = court_field.options[court_field.selectedIndex].value
+    let selectedDateValue = date_field.value
+
+    function changeSelected() {
+        let court_field = document.getElementById("court")
+        let date_field = document.getElementById("date")
+        let time_option = document.querySelectorAll("time-option")
+
+        // Get selected values of releveant fields
+        let selectedCourtValue = court_field.options[court_field.selectedIndex].value
+        let selectedDateValue = date_field.value
+    }
+</script>
 
 {% endblock %}
