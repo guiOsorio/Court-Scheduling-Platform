@@ -377,4 +377,4 @@ def getAllBookedHoursInfo():
         booking_info["time"] = info[2]
         booked_hours_info.append(booking_info)
 
-    return booked_hours_info # list of lists
+    return booked_hours_info # list of objects

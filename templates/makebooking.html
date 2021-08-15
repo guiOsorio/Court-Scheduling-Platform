@@ -24,7 +24,7 @@
             
             <div class="form-field">
                 <label for="time">Time</label>
-                <select name="time" id="time" onchange="changeSelected()">
+                <select name="time" id="time">
                     {% for time in pts %}
                         <option class="time-option" value="{{time}}">{{time}}</option>
                     {% endfor %}
@@ -44,27 +44,88 @@
 {% block js %}
 
 <script>
-    // Transform python variable to json
-    let bhs = {{ bhs | tojson }}
-
-    // Get all relevant fields
-    let court_field = document.getElementById("court")
-    let date_field = document.getElementById("date")
-    let time_option = document.querySelectorAll("time-option")
-
-    // Get selected values of releveant fields
-    let selectedCourtValue = court_field.options[court_field.selectedIndex].value
-    let selectedDateValue = date_field.value
-
     function changeSelected() {
+        // ALGORITHM TO DISABLE TIME FIELDS WHICH ARE NOT VALID, BASED ON THE COURT AND DATE SELECTED
+        // The algorithm is called twice, the first one for when the page is first rendered, and the second one for when a select option is modified
+        // Transform python variable to json
+        let bhs = {{ bhs | tojson }}
+
+        // Get possibletimes array and possibletimesweekend array
+        pts = {{ pts | tojson}}
+        ptsw = {{ ptsw | tojson}}
+
+        // Get all relevant fields
         let court_field = document.getElementById("court")
         let date_field = document.getElementById("date")
-        let time_option = document.querySelectorAll("time-option")
+        let time_option = document.querySelectorAll(".time-option")
 
         // Get selected values of releveant fields
         let selectedCourtValue = court_field.options[court_field.selectedIndex].value
         let selectedDateValue = date_field.value
+
+        // If the selected date is a weekend day, disable the invalid times
+        let disabledWeekend = []
+        // Iterate through week times
+        for(let i = 0; i < pts.length; i++) {
+            // variable to check if the weekend time from possible times is valid
+            let isValidWeekendTime = false
+            // Iterate through weekend times
+            for(let k = 0; k < ptsw.length; k++) {
+                // if the week time is also a weekend time, move on to the next time
+                if(pts[i] == ptsw[k]) {
+                    isValidWeekendTime = true
+                    break
+                }
+            }
+            // if time should be disabled on weekends, add the time string to the disabledWeekends list
+            if(!isValidWeekendTime) {
+                disabledWeekend.push(pts[i])
+            }
+        }
+
+        // Create array to store the index numbers of time options to be disabled
+        let disabledOptions = []
+
+        // for each booking in bhs array
+        for(let i = 0; i < bhs.length; i++) {
+            // for each time option given
+            for(let k = 0; k < time_option.length; k++) {
+                // make object to compare to current booking of the iteration
+                selected_info = {"court": Number(selectedCourtValue), "date": selectedDateValue, "time": time_option[k].value}
+                // if all fields from the object created match the fields from the booking being iterated, add the index number of the time option to the disabledOptions array
+                if(bhs[i]["court"] == selected_info["court"] && bhs[i]["date"] == selected_info["date"] && bhs[i]["time"] == selected_info["time"]) {
+                    disabledOptions.push(k)
+                // also add the index number of the time option to the disabledOptions array if the option is "Choose a time"
+                } else if(selected_info["time"] == "Choose a time") {
+                    disabledOptions.push(k)
+                // if the selected date represent a weekend day
+                } else if(date_field.valueAsDate.getDay() == 0 || date_field.valueAsDate.getDay() == 6) {
+                    for(let z = 0; z < disabledWeekend.length; z++) {
+                        if(selected_info["time"] == disabledWeekend[z]) {
+                            disabledOptions.push(k)
+                        }
+                        // make sure option is not disabled if the time is valid
+                        else {
+                            time_option[k].disabled = false
+                        }
+                    }
+                } else {
+                    time_option[k].disabled = false
+                }
+            }
+        }
+
+        let uniqueDisabledOptions = disabledOptions.filter((c, index) => {
+            return disabledOptions.indexOf(c) === index;
+        });
+
+        for(let i = 0; i < uniqueDisabledOptions.length; i++) {
+            indexnum = uniqueDisabledOptions[i]
+            time_option[indexnum].disabled = true
+        }
     }
+
+    changeSelected()
 </script>
 
 {% endblock %}

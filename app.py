@@ -111,7 +111,7 @@ def makebooking():
     
     booked_hours_info = getAllBookedHoursInfo()
 
-    return render_template("makebooking.html", form=form, bhs=booked_hours_info, pts=possibletimes)
+    return render_template("makebooking.html", form=form, pts=possibletimes, ptsw=possibletimesweekend, bhs=booked_hours_info)
 
 
 
@@ -634,7 +634,6 @@ if __name__ == '__main__':
         # make forms buttons and inputs look nice
         # add footer to the layout
         # JS
-            # disable unavailable booking hours when user is booking a court (already booked hours or weekend not operational hours)
             # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
     # have a detailed Readme
     # delete Bootstrap locally
