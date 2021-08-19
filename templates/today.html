@@ -5,9 +5,9 @@
 {% for court in cd %}
 
 <div class="court-times">
-    <h3>Court {{ court }}</h3>
+    <h3 class='court-title'>Court {{ court }}</h3>
     
-    <table>
+    <table class="today-table">
         <thead>
             <tr>
                 {% for time in pt[1:hlenpt] %}
@@ -16,15 +16,26 @@
                     {% endif %}
                 {% endfor %}
             </tr>
+        </thead>
+        <tbody>
             <tr>
                 {% for time in cd[court] %}
                     {% if time in pt[1:hlenpt] %}
                         {% if cd[court][time]["username"] %}
                             {% if cd[court][time]["username"]|length > 8 %}
-                                <td><a class="trigger_popup trigger_popup{{ loop.index }}">{{ cd[court][time]["username"][:7] }}..</a></td>
-                                <div class="test test{{ loop.index }}">Test Div</div>
+                            <td>
+                                <div class="popup popup__{{ cd[court][time]['username'] }}{{ loop.index }}">
+                                    <div class="popup__text">{{ cd[court][time]["username"] }}</div>
+                                </div>
+                                <a class="trigger__popup {{ cd[court][time]['username'] }}{{ loop.index }}">{{ cd[court][time]["username"][:7] }}..</a>
+                            </td>
                             {% else %}
-                                <td>{{ cd[court][time]["username"] }}</td>
+                                <td>
+                                    <div class="popup popup__{{ cd[court][time]['username'] }}{{ loop.index }}">
+                                        <div class="popup__text">{{ cd[court][time]["username"] }}</div>
+                                    </div>
+                                    <a class="trigger__popup {{ cd[court][time]['username'] }}{{ loop.index }}">{{ cd[court][time]["username"] }}</a>
+                                </td>
                             {% endif %}
                         {% else %}
                             <td> - </td>
@@ -32,10 +43,10 @@
                     {% endif %}
                 {% endfor %}
             </tr>
-        </thead>
+        </tbody>
     </table>
     
-    <table>
+    <table class="today-table">
         <thead>
             <tr>
                 {% for time in pt[hlenpt:] %}
@@ -44,74 +55,66 @@
                     {% endif %}
                 {% endfor %}
             </tr>
+        </thead>
+        <tbody>
+
             <tr>
                 {% for time in cd[court] %}
                     {% if time in pt[hlenpt:] %}
                         {% if cd[court][time]["username"] %}
                             {% if cd[court][time]["username"]|length > 8 %}
-                                <td>{{ cd[court][time]["username"][:7] }}..</td>
+                                <td>
+                                    <div class="popup popup__{{ cd[court][time]['username'] }}{{ loop.index }}">
+                                        <div class="popup__text">{{ cd[court][time]["username"] }}</div>
+                                    </div>
+                                    <a class="trigger__popup {{ cd[court][time]['username'] }}{{ loop.index }}">{{ cd[court][time]["username"][:7] }}..</a>
+                                </td>
                             {% else %}
-                                <td>{{ cd[court][time]["username"] }}</td>
+                                <td>
+                                    <div class="popup popup__{{ cd[court][time]['username'] }}{{ loop.index }}">
+                                        <div class="popup__text">{{ cd[court][time]["username"] }}</div>
+                                    </div>
+                                    <a class="trigger__popup {{ cd[court][time]['username'] }}{{ loop.index }}">{{ cd[court][time]["username"] }}</a>
+                                </td>
                             {% endif %}
                         {% else %}
                             <td> - </td>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
-            </tr>
-        </thead>
+                </tr>
+        </tbody>
     </table>
 </div>
 
 {% endfor %}
 
-<style>
-    .court-times {
-        border: 1px solid #777;
-        text-align: center;
-        margin-bottom: 20px;
-        overflow-x: auto;
-    }
-    table {
-        font-size: 18px;
-        margin: 0 auto;
-    }
-    tr * {
-        padding: 7px 15px;
-    }
-
-    @media (max-width: 600px) {
-        table {
-            font-size: 10px;
-        }
-        tr * {
-            padding: 4px 10px;
-        }
-    }
-
-    .test {
-        display: none;
-        background-color: blueviolet;
-    }
-</style>
-
 {% endblock %}
 
 {% block js %}
     <script>
-        Object.size = function(obj) {
-            var size = 0,
-                key;
-            for (key in obj) {
-                if (obj.hasOwnProperty(key)) size++;
-            }
-            return size;
-        };
+        // OPEN POPUP
+        let trigger = document.querySelectorAll('.trigger__popup')
+        let openPopup = function() {
+            let popupClass = `.popup__${this.classList[1]}`
+            let popup = document.querySelector(popupClass)
+            popup.style.display = 'block'
+            this.style.display = 'none'
+        }
+        for (let i = 0; i < trigger.length; i++) {
+            trigger[i].addEventListener('click', openPopup)
+        }
 
-        let courts_dict = {{ cd | tojson }}
-        let courts_dict_size = Object.size(courts_dict)
-        console.log(courts_dict_size)
-        let test = document.querySelector('.test2')
-        test.style.display = "block"
+        // CLOSE POPUP
+        let popup = document.querySelectorAll('.popup')
+        let closePopup = function() {
+            this.style.display = 'none'
+            let linkClass = `.${this.classList[1].slice(7)}`
+            let link = document.querySelector(linkClass)
+            link.style.display = 'block'
+        }
+        for (let i = 0; i < popup.length; i++) {
+            popup[i].addEventListener('click', closePopup)
+        }
     </script>
 {% endblock %}

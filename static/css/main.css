@@ -21,12 +21,13 @@ body {
 .content {
   padding: 0 2rem;
   margin-top: 2rem;
-  color: #8E8D8A;
+  color: #8e8d8a;
   font-weight: bold;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: "Comfortaa", cursive, sans-serif;
+  font-weight: bold;
 }
 
 @media (max-width: 1000px) {
@@ -44,6 +45,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 70%;
   }
 }
+/**************** FORMS ****************/
 .form {
   display: flex;
 }
@@ -90,6 +92,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(10%);
 }
 .form-btn input[type=submit], .form-btn button {
+  border-radius: 8px;
   padding: 0.5rem 1.1rem;
   border: none;
   background-color: #E85A4F;
@@ -131,6 +134,66 @@ input:focus, select:focus {
     width: 100%;
   }
 }
+/********************************/
+/**************** TODAY BOOKINGS ****************/
+.court-title {
+  padding: 1rem;
+}
+
+.court-times {
+  border: 1px solid #777;
+  text-align: center;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.today-table {
+  font-size: 18px;
+  margin: 0 auto;
+}
+.today-table tr * {
+  padding: 0.5rem 1rem;
+}
+.today-table a {
+  cursor: pointer;
+}
+.today-table a:hover {
+  color: #E98074;
+}
+
+.trigger__popup {
+  color: #E98074;
+}
+
+.popup {
+  display: none;
+  position: relative;
+  z-index: 1;
+}
+.popup__text {
+  z-index: 10;
+  background-color: rgba(142, 141, 138, 0.8);
+  /* color-secondary-dark */
+  color: #E85A4F;
+  /* color-primary */
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.8rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  transform: translateY(-10%);
+}
+
+@media (max-width: 600px) {
+  .today-table {
+    font-size: 10px;
+  }
+
+  .today-table tr * {
+    padding: 4px 10px;
+  }
+}
+/********************************/
 .ownalert-success {
   background-color: #399d61;
   color: white;

@@ -1,3 +1,5 @@
+/**************** FORMS ****************/
+
 .form {
     display: flex;
 
@@ -51,6 +53,7 @@
         transform: translateX(10%);
 
         & input[type="submit"], button {
+            border-radius: 8px;
             padding: .5rem 1.1rem;
             border: none;
             background-color: $color-primary;
@@ -104,3 +107,69 @@ input:focus, select:focus {
         }
     }
 }
+
+/********************************/
+
+
+/**************** TODAY BOOKINGS ****************/
+
+.court-title {
+    padding: 1rem;
+}
+
+.court-times {
+    border: 1px solid #777;
+    text-align: center;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.today-table {
+    font-size: 18px;
+    margin: 0 auto;
+
+    & tr * {
+        padding: .5rem 1rem;
+    }
+
+    & a {
+        cursor: pointer;
+
+        &:hover {
+            color: #E98074;
+        }
+    }
+}
+
+.trigger__popup {
+    color: #E98074;
+}
+
+.popup {
+    display: none;
+    position: relative;
+    z-index: 1;
+
+    &__text {
+        z-index: 10;
+        background-color: rgba(142, 141, 138, 0.8); /* color-secondary-dark */
+        color: #E85A4F; /* color-primary */
+        text-decoration: none;
+        font-weight: bold;
+        padding: .8rem;
+        border-radius: 5px;
+        font-size: .9rem;
+        transform: translateY(-10%);
+    }
+}
+
+@media (max-width: 600px) {
+    .today-table {
+        font-size: 10px;
+    }
+    .today-table tr * {
+        padding: 4px 10px;
+    }
+}
+
+/********************************/

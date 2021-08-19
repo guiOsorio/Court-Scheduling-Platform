@@ -622,17 +622,12 @@ if __name__ == '__main__':
 
 # Pre-Deployment
     # styling (with SASS and JS where necessary + Bootstrap) (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
-        # move today.html styles to sass
         # style all pages
         # make forms buttons and inputs look nice
         # style bookings result
         # add footer to the layout
         # make pages responsive
-        # JS
-            # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
-                # have each element have the class equal to the username, and using the .classList[classindex] selector, display the full selected username on the popup box
     # have a detailed Readme
-    # delete Bootstrap locally
 # Deployment
     # deploy and show to Luis
 
