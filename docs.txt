@@ -89,8 +89,10 @@
                     # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
                     # have login form be on the center of the page and with a different background
                 # make forms buttons and inputs look nice
+                # style all pages
                 # flash styling
                 # add footer to the layout
+                # make pages responsive
                 # JS
                     # disable unavailable booking hours when user is booking a court
                     # show current date and time (hours and minutes) to update every minute on top of book a court page
@@ -125,6 +127,16 @@
         # major styling
         # implement payment functionality (make it optional for businesses)
         # create indexes where necessary (partial indexes ??)
+        # styling (with SASS and JS where necessary + Bootstrap) (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
+        # homepage (index.html)
+            # have 2 nice Dan photos or from Unsplash on right half of screen and big title located a bit below images on the left side of the screen, 
+                # as well as a smaller subtitle under the title
+            # images on right side of screen grow bigger on hover and partially go on top of each other like on the ACM website
+            # leave some space after main section for user to see the page continues
+            # have another section with a rectangle with text on the center of it
+        # login (login.html)
+            # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
+            # have login form be on the center of the page and with a different background
     # version 3.0 - have booking tennis courts be one of many possible types of bookings to be made, implement booking for other sports such as soccer, basketball, etc
         # update search bar to show results for different categories (show sports offered first, and under it show the clubs)
     # version 4.0 - implement non-sport related bookings, such as for restaurant tables, offices (like lawyer, doctor, etc), hair salons, etc

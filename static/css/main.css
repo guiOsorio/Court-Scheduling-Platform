@@ -29,11 +29,26 @@ h1, h2, h3, h4, h5, h6 {
   font-family: "Comfortaa", cursive, sans-serif;
 }
 
+@media (max-width: 1000px) {
+  html {
+    font-size: 90%;
+  }
+}
+@media (max-width: 850px) {
+  html {
+    font-size: 80%;
+  }
+}
+@media (max-width: 750px) {
+  html {
+    font-size: 70%;
+  }
+}
 .form {
-  margin-top: 5rem;
   display: flex;
 }
 .form__standard {
+  margin-top: 5rem;
   align-items: center;
   justify-content: center;
 }
@@ -41,6 +56,22 @@ h1, h2, h3, h4, h5, h6 {
   transform: translate(-25%, 30%);
   font-size: 3.5rem;
   color: #E98074;
+}
+.form__multiple {
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #FFF;
+  padding: 2.5rem 0;
+}
+.form__multiple__title {
+  width: 20vw;
+  float: right;
+}
+.form__multiple__title h3 {
+  font-size: 2.7rem;
+  color: #E98074;
+  text-align: end;
+  line-height: 1.5;
 }
 .form-field {
   padding: 0.7rem 0;
@@ -58,7 +89,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   transform: translateX(10%);
 }
-.form-btn button {
+.form-btn input[type=submit], .form-btn button {
   padding: 0.5rem 1.1rem;
   border: none;
   background-color: #E85A4F;
@@ -66,10 +97,40 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
 }
 
+.reset-form {
+  display: inline;
+}
+
 input:focus, select:focus {
   outline-color: #E98074;
 }
 
+@media (max-width: 750px) {
+  .form {
+    margin-top: 8rem;
+  }
+}
+@media (max-width: 650px) {
+  .form {
+    flex-direction: column;
+    margin-top: 5rem;
+  }
+  .form__standard__title {
+    transform: translate(0, 0);
+    margin-bottom: 3rem;
+  }
+  .form-btn {
+    transform: translateX(0);
+  }
+}
+@media (max-width: 400px) {
+  .form-field label {
+    width: 100%;
+  }
+  .form-field input, .form-field select {
+    width: 100%;
+  }
+}
 .ownalert-success {
   background-color: #399d61;
   color: white;

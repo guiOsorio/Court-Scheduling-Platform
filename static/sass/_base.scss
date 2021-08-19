@@ -28,3 +28,21 @@ body {
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Comfortaa', cursive, sans-serif;
 }
+
+@media (max-width: 1000px) {
+    html {
+        font-size: 90%;
+    }
+}
+
+@media (max-width: 850px) {
+    html {
+        font-size: 80%;
+    }
+}
+
+@media (max-width: 750px) {
+    html {
+        font-size: 70%;
+    }
+}

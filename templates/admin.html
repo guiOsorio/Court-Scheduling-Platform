@@ -6,88 +6,128 @@
 
     <a href="/today">Today's bookings</a>
 
-    <h3>Check day</h3>
 
-    <form action="/admin" method="POST">
-        {{ form_court_date.csrf_token }}
-
-        {{ form_court_date.court.label }}
-        {{ form_court_date.court }}
-
-        {{ form_court_date.date.label }}
-        {{ form_court_date.date }}
-
-        <input type="submit" id="show_day" name="show_day" value="Show day">
-    </form>
-
-    <form action="/admin" method="GET">
-        <button>Reset</button>
-    </form>
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3>Check day</h3>
+        </div>
+        <form action="/admin" method="POST">
+            {{ form_court_date.csrf_token }}
+            
+            <div class="form-field">
+                {{ form_court_date.court.label }}
+                {{ form_court_date.court }}
+            </div>
+                
+            <div class="form-field">
+                {{ form_court_date.date.label }}
+                {{ form_court_date.date }}
+            </div>
+            
+            <div class="form-btn">
+                <input type="submit" id="show_day" name="show_day" value="Show day">
+                <div class="reset-form">
+                    <form action="/admin" method="GET">
+                        <button>Reset</button>
+                    </form>
+                </div>
+            </div>
+        </form>
+    </div>
 
     {% if msg %}
-        <h5>{{ msg }}</h5>
+    <h5>{{ msg }}</h5>
     {% elif bd %}
-        {% for b in bd %}
-            <h5>BOOKING</h5>
-            <ul>
-                <li>User - {{ b[0] }}</li>
-                <li>Email - {{ b[7] }}</li>
-                <li>Day - {{ b[1] }}</li>
-                <li>Date - {{ b[2] }}</li>
-                <li>Time - {{ b[3] }}</li>
-                <li>Court - {{b[4] }}</li>
-                <li>People playing - {{ b[5] }}</li>
-            </ul>
-
-            <form action="/api/deletebooking" method="POST">
-                <input type="hidden" name="id" value="{{ b[6] }}">
-                <input type="submit" id="admin_delete_booking" name="admin_delete_booking" value="Delete booking">
-            </form>
-        {% endfor %}
+    {% for b in bd %}
+    <h5>BOOKING</h5>
+    <ul>
+        <li>User - {{ b[0] }}</li>
+        <li>Email - {{ b[7] }}</li>
+        <li>Day - {{ b[1] }}</li>
+        <li>Date - {{ b[2] }}</li>
+        <li>Time - {{ b[3] }}</li>
+        <li>Court - {{b[4] }}</li>
+        <li>People playing - {{ b[5] }}</li>
+    </ul>
+    <form action="/api/deletebooking" method="POST">
+        <input type="hidden" name="id" value="{{ b[6] }}">
+        <input type="submit" id="admin_delete_booking" name="admin_delete_booking" value="Delete booking">
+    </form>
+    {% endfor %}
     {% endif %}
 
-    <h3>Create index</h3>
-    
-    <form action="/api/createindex" method="POST" autocomplete="off">
-        <label for="name">Index name</label>
-        <input type="text" name="name" id="name">
+      
+    <div class="form form__multiple">
+        <div class="form__multiple__title">    
+            <h3>Create index</h3>        
+        </div>
+        <form action="/api/createindex" method="POST" autocomplete="off">
+            <div class="form-field">
+                <label for="name">Index name</label>
+                <input type="text" name="name" id="name">
+            </div>
+            
+            <div class="form-field">
+                <label for="table">Table</label>
+                <input type="text" name="table" id="table">
+            </div>
+            
+            <div class="form-field">
+                <label for="columns">Columns</label>    
+                <input type="text" name="columns" id="columns">
+            </div>
+            
+            <div class="form-btn">
+                <input type="submit" id="create_index" name="create_index" value="Create index">
+            </div>
+        </form>
+    </div>
 
-        <label for="table">Table</label>
-        <input type="text" name="table" id="table">
-
-        <label for="columns">Columns</label>
-        <input type="text" name="columns" id="columns">
-
-        <input type="submit" id="create_index" name="create_index" value="Create index">
-    </form>
-
-    <h3>Book day</h3>
-
-    <form action="/api/bookalday" method="POST">
-        {{ form_court_date.csrf_token }}
-
-        {{ form_court_date.court.label }}
-        {{ form_court_date.court}}
-
-        {{ form_court_date.date.label }}
-        {{ form_court_date.date }}
-
-        <input type="submit" name="book_day" id="book_day" value="Book day">
-    </form>
-
-    <h3>Number of bookings per day</h3>
-
-    <form action="/admin" method="POST">
-        {{ form_court_date.csrf_token }}
-
-        {{ form_court_date.court.label }}
-        {{ form_court_date.court}}
-
-        {{ form_court_date.date.label }}
-        {{ form_court_date.date }}
-
-        <input type="submit" name="count_day_bookings" id="count_day_bookings" value="Count day's bookings">
-    </form>
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3>Book day</h3>
+        </div>
+        <form action="/api/bookalday" method="POST">
+            {{ form_court_date.csrf_token }}
+            
+            <div class="form-field">
+                {{ form_court_date.court.label }}
+                {{ form_court_date.court}}
+            </div>
+            
+            <div class="form-field">
+                {{ form_court_date.date.label }}
+                {{ form_court_date.date }}
+            </div>
+            
+            <div class="form-btn">
+                <input type="submit" name="book_day" id="book_day" value="Book day">
+            </div>
+        </form>
+    </div>
+        
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3 class="form__multiple__title">Number of bookings per day</h3>
+        </div>
+        <form action="/admin" method="POST">
+            {{ form_court_date.csrf_token }}
+            
+            <div class="form-field">
+                {{ form_court_date.court.label }}
+                {{ form_court_date.court}}
+            </div>
+            
+            <div class="form-field">
+                {{ form_court_date.date.label }}
+                {{ form_court_date.date }}
+            </div>
+            
+            <div class="form-btn">
+                <input type="submit" name="count_day_bookings" id="count_day_bookings" value="Count day's bookings">
+            </div>
+        </form>
+    </div>
 
     {% if day_count and selected_date_str %}
         {% if court %}
@@ -103,23 +143,34 @@
         {% endif %}
     {% endif %}
 
-    <h3>Total bookings</h3>
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3>Total bookings</h3>
+        </div>
+        <form action="/admin" method="POST">
+            <div class="form-field">
+                <label for="court">Court</label>
+                <select name="court" id="court">
+                    {% for court in courts_all %}
+                    <option value="{{ court }}">{{ court }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <form action="/admin" method="POST">
-        <label for="court">Court</label>
-        <select name="court" id="court">
-            {% for court in courts_all %}
-                <option value="{{ court }}">{{ court }}</option>
-            {% endfor %}
-        </select>
-        <label for="range">Select a date range</label>
-        <select name="range" id="range">
-            <option value="upcoming">Upcoming</option>
-            <option value="total">Total</option>
-        </select>
-        <input type="submit" name="count_all_bookings" id="count_all_bookings" value="Count all bookings">
-    </form>
+            <div class="form-field">
+                <label for="range">Select a date range</label>
+                <select name="range" id="range">
+                    <option value="upcoming">Upcoming</option>
+                    <option value="total">Total</option>
+                </select>
+            </div>
 
+            <div class="form-btn">
+                <input type="submit" name="count_all_bookings" id="count_all_bookings" value="Count all bookings">
+            </div>
+        </form>
+    </div>
+        
     {% if total_count or total_count == 0 %}
         {% if court == "All courts" %}
             <p><strong>Count of {{ input_range }} bookings for {{ court }} is {{ total_count }}</strong></p>

@@ -1,8 +1,8 @@
 .form {
-    margin-top: 5rem;
     display: flex;
 
     &__standard {
+        margin-top: 5rem;
         align-items: center;
         justify-content: center;
 
@@ -10,6 +10,24 @@
             transform: translate(-25%, 30%);
             font-size: 3.5rem;
             color: $color-primary-light;
+        }
+    }
+
+    &__multiple {
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid $color-white;
+        padding: 2.5rem 0;
+
+        &__title {
+            width: 20vw;
+            float: right;
+            & h3 {
+                font-size: 2.7rem;
+                color: $color-primary-light;
+                text-align: end;
+                line-height: 1.5;
+            }
         }
     }
 
@@ -32,7 +50,7 @@
         text-align: center;
         transform: translateX(10%);
 
-        & button {
+        & input[type="submit"], button {
             padding: .5rem 1.1rem;
             border: none;
             background-color: $color-primary;
@@ -42,6 +60,47 @@
     }
 }
 
+.reset-form {
+    display: inline;
+}
+
 input:focus, select:focus {
     outline-color: $color-primary-light;
+}
+
+@media (max-width: 750px) {
+    .form {
+        margin-top: 8rem;
+    }
+}
+
+
+@media (max-width: 650px) {
+    .form {
+        flex-direction: column;
+        margin-top: 5rem;
+
+        &__standard__title {
+            transform: translate(0, 0);
+            margin-bottom: 3rem;
+        }
+
+        &-btn {
+            transform: translateX(0);
+        }
+    }
+}
+
+@media (max-width: 400px) {
+    .form {
+        &-field {
+            & label {
+                width: 100%;
+            }
+            
+            & input, select {
+                width: 100%;
+            }
+        }
+    }
 }

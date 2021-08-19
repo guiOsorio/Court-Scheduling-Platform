@@ -622,19 +622,15 @@ if __name__ == '__main__':
 
 # Pre-Deployment
     # styling (with SASS and JS where necessary + Bootstrap) (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
-        # homepage (index.html)
-            # have 2 nice Dan photos or from Unsplash on right half of screen and big title located a bit below images on the left side of the screen, 
-                # as well as a smaller subtitle under the title
-            # images on right side of screen grow bigger on hover and go on top of each other like on the ACM website
-            # leave some space after main section for user to see the page continues
-            # have another section with a rectangle with text on the center of it
-        # login (login.html)
-            # have background-image cover the entire page, this image will be a little transparent (use opacity) and might be taken from dan's photos or Unsplash
-            # have login form be on the center of the page and with a different background
+        # move today.html styles to sass
+        # style all pages
         # make forms buttons and inputs look nice
+        # style bookings result
         # add footer to the layout
+        # make pages responsive
         # JS
             # on /today page, add styles to make long usernames clickable, and once clicked, show full username on a box (like a dialog box)
+                # have each element have the class equal to the username, and using the .classList[classindex] selector, display the full selected username on the popup box
     # have a detailed Readme
     # delete Bootstrap locally
 # Deployment

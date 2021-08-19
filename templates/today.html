@@ -21,7 +21,8 @@
                     {% if time in pt[1:hlenpt] %}
                         {% if cd[court][time]["username"] %}
                             {% if cd[court][time]["username"]|length > 8 %}
-                                <td>{{ cd[court][time]["username"][:7] }}..</td>
+                                <td><a class="trigger_popup trigger_popup{{ loop.index }}">{{ cd[court][time]["username"][:7] }}..</a></td>
+                                <div class="test test{{ loop.index }}">Test Div</div>
                             {% else %}
                                 <td>{{ cd[court][time]["username"] }}</td>
                             {% endif %}
@@ -87,6 +88,30 @@
             padding: 4px 10px;
         }
     }
+
+    .test {
+        display: none;
+        background-color: blueviolet;
+    }
 </style>
 
+{% endblock %}
+
+{% block js %}
+    <script>
+        Object.size = function(obj) {
+            var size = 0,
+                key;
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) size++;
+            }
+            return size;
+        };
+
+        let courts_dict = {{ cd | tojson }}
+        let courts_dict_size = Object.size(courts_dict)
+        console.log(courts_dict_size)
+        let test = document.querySelector('.test2')
+        test.style.display = "block"
+    </script>
 {% endblock %}
