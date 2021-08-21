@@ -57,7 +57,7 @@ h1, h2, h3, h4, h5, h6 {
 .form__standard__title {
   transform: translate(-25%, 30%);
   font-size: 3.5rem;
-  color: #E98074;
+  color: #E85A4F;
 }
 .form__multiple {
   align-items: center;
@@ -66,13 +66,13 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2.5rem 0;
 }
 .form__multiple__title {
-  width: 20vw;
+  max-width: 40vw;
   float: right;
 }
 .form__multiple__title h3 {
   font-size: 2.7rem;
   color: #E98074;
-  text-align: end;
+  text-align: center;
   line-height: 1.5;
 }
 .form-field {
@@ -194,6 +194,80 @@ input:focus, select:focus {
   }
 }
 /********************************/
+/**************** ACCOUNT ****************/
+.account-info {
+  top: 1rem;
+  height: 100%;
+  position: sticky;
+}
+
+/********************************/
+/**************** MYBOOKINGS ****************/
+#mybookings__title {
+  text-align: center;
+  color: #E85A4F;
+  margin: 2rem 0;
+}
+
+.forms {
+  text-align: center;
+}
+.forms *:not(:last-child) {
+  margin: 1rem auto;
+}
+.forms form:not(:last-child) {
+  border-bottom: 1px solid #FFF;
+}
+.forms .form-field {
+  padding: 0.7rem 0;
+  width: 60%;
+  display: inline-block;
+  transform: translate(0, 0);
+}
+.forms .form-field label {
+  width: 15rem;
+  text-align: center;
+}
+.forms .form-field input, .forms .form-field select {
+  width: 15rem;
+  border-color: #EAE7DC;
+}
+.forms-btn {
+  text-align: center;
+  width: 20%;
+  display: inline-block;
+}
+.forms-btn input[type=submit], .forms-btn button {
+  border-radius: 8px;
+  padding: 0.7rem 1.1rem;
+  border: none;
+  background-color: #E85A4F;
+  color: #EAE7DC;
+  font-weight: bold;
+  margin: 1rem 0 0 0;
+}
+
+#special-field {
+  transform: translate(0, -50%);
+}
+
+@media (max-width: 500px) {
+  .forms *:not(:last-child) {
+    margin: 2rem auto;
+  }
+
+  .forms .form-field {
+    transform: translate(-20%, 0);
+  }
+
+  .forms-btn {
+    width: 30%;
+  }
+
+  #special-field {
+    transform: translate(-20%, -30%);
+  }
+}
 .ownalert-success {
   background-color: #399d61;
   color: white;

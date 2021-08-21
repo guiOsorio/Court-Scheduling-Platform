@@ -622,11 +622,8 @@ if __name__ == '__main__':
 
 # Pre-Deployment
     # styling (with SASS and JS where necessary + Bootstrap) (simple but modern style - clean lines, have a nice login and homepage, simple design on other pages)
-        # style all pages
-        # make forms buttons and inputs look nice
-        # style bookings result
+        # style bookings results
         # add footer to the layout
-        # make pages responsive
     # have a detailed Readme
 # Deployment
     # deploy and show to Luis

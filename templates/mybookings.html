@@ -2,33 +2,46 @@
 
 {% block content %}
 
-    <h1>MY BOOKINGS</h1>
+    <h1 id="mybookings__title">MY BOOKINGS</h1>
 
-    <form action="/mybookings" method="POST">
-        {{ form.csrf_token }}
+    <div class="forms">
 
-        {{ form.date.label }}
-        {{ form.date }}
+        <form action="/mybookings" method="POST">
+            {{ form.csrf_token }}
 
-        <input type="submit" value="Show day" id="show_day" name="show_day">
-        <input type="submit" value="Show upcoming" id="show_upcoming" name="show_upcoming">
-    </form>
+            <div class="form-field" id="special-field">
+                {{ form.date.label }}
+                {{ form.date }}
+            </div>
+            
+            <div class="forms-btn">
+                <input type="submit" value="Show day" id="show_day" name="show_day">
+                <input type="submit" value="Show upcoming" id="show_upcoming" name="show_upcoming">
+            </div>
+        </form>
+        
+        <form action="/api/deletedaybookings" method="POST">
+            {{ form.csrf_token }}
+            
+            <div class="form-field">
+                {{ form.date.label }}
+                {{ form.date }}
+            </div>
 
-    <form action="/api/deletedaybookings" method="POST">
-        {{ form.csrf_token }}
+            <div class="forms-btn">
+                <input type="submit" value="Delete day" id="delete_day" name="delete_day">
+            </div>
+        </form>
 
-        {{ form.date.label }}
-        {{ form.date }}
-
-        <input type="submit" value="Delete day" id="delete_day" name="delete_day">
-    </form>
-
-    <form action="/api/deleteallbookings" method="POST">
-        <input type="submit" value="Delete all" id="delete_all" name="delete_all">
-    </form>
+        <form action="/api/deleteallbookings" method="POST">
+            <div class="forms-btn">
+                <input type="submit" value="Delete all" id="delete_all" name="delete_all">
+            </div>
+        </form>
+    </div>
 
     {% if msg %}
-        <h4>{{ msg }}</h4>
+    <h4>{{ msg }}</h4>
     {% else %}
         {% for b in bd %}
             <h4>BOOKING</h4>

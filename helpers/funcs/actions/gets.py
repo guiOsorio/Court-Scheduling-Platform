@@ -121,6 +121,7 @@ def getAllBookingsCount(input_range, court, current_time_str):
     cur = con.cursor()
     
     isRangeValid = True
+    total_count = 0
     # count number of all bookings based on input
     if input_range == "upcoming": # only count bookings for today and the future
         current_date_str = getCurrDate()

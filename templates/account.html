@@ -4,42 +4,74 @@
 
     <h1>Manage your account</h1>
 
-    <h3>Account Info</h3>
-    <p>Username: <strong>{{ userInfo["uname"] }}</strong></p>
-    <p>Email address: <strong>{{ userInfo["eaddress"] }}</strong></p>
-    <p>Account type: <strong>{{ userInfo["type"] }}</strong></p>
+    <div class="account-info">
+        <h3>Account Info</h3>
+        <p>Username: <strong>{{ userInfo["uname"] }}</strong></p>
+        <p>Email address: <strong>{{ userInfo["eaddress"] }}</strong></p>
+        <p>Account type: <strong>{{ userInfo["type"] }}</strong></p>
+    </div>
 
-    <form action="/api/changepassword" method="POST">
-        <h3>Change password</h3>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3>Change password</h3>
+        </div>
+        <form action="/api/changepassword" method="POST">
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            
+            <div class="form-field">
+                <label for="newpassword">New Password</label>
+                <input type="password" name="newpassword" id="newpassword">
+            </div>
+            
+            <div class="form-field">
+                <label for="confirmation">Confirmation</label>
+                <input type="password" name="confirmation" id="confirmation">
+            </div>
 
-        <label for="newpassword">New Password</label>
-        <input type="password" name="newpassword" id="newpassword">
+            <div class="form-btn">
+                <input type="submit" id="changepassword" name="changepassword" value="Change password">
+            </div>
+        </form>
+    </div>
 
-        <label for="confirmation">Confirm new password</label>
-        <input type="password" name="confirmation" id="confirmation">
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3>Change email</h3>
+        </div>
+        <form action="/api/changeemail" method="POST" autocomplete="off">
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            
+            <div class="form-field">
+                <label for="newemail">New email</label>
+                <input type="email" name="newemail" id="newemail">
+            </div>
+            
+            <div class="form-btn">
+                <input type="submit" id="changeemail" name="changeemail" value="Change email">
+            </div>
+        </form>
+    </div>
 
-        <input type="submit" id="changepassword" name="changepassword" value="Change password">
-    </form>
-
-    <form action="/api/changeemail" method="POST" autocomplete="off">
-        <h3>Change email</h3>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-
-        <label for="newemail">New email</label>
-        <input type="email" name="newemail" id="newemail">
-
-        <input type="submit" id="changeemail" name="changeemail" value="Change email">
-    </form>
-
-    <form action="/api/deleteaccount" method="POST">
-        <h3>Delete account</h3>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-
-        <input type="submit" id="deleteaccount" name="deleteaccount" value="Delete">
-    </form>
+    <div class="form form__multiple">
+        <div class="form__multiple__title">
+            <h3>Delete account</h3>
+        </div>
+        <form action="/api/deleteaccount" method="POST">
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            
+            <div class="form-btn">
+                <input type="submit" id="deleteaccount" name="deleteaccount" value="Delete">
+            </div>
+        </form>
+    </div>
 
 {% endblock %}
