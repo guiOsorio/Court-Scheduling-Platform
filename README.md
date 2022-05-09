@@ -1,4 +1,4 @@
-# Scheduling-Demo
+# Court-Scheduling-Platform
 
 This project consists of an application with features to support the booking of tennis court for a tennis club.
 
